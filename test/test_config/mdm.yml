@@ -1,0 +1,12 @@
+mdm:
+  db_pool:
+    maxconn: 30
+    minconn: 10
+  log: D
+  sowa: true
+  timing: D
+  uvicorn:
+    host: 0.0.0.0
+    log: error
+    port: 8000
+    workers: 1
