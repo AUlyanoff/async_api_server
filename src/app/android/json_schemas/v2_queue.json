@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "/api/v2/queue",
+  "$comment": "Соответствует всем предъявленным требованиям",
+  "description": "X-MCC-ID: ‹long: kit_id›",
+  "type": "array",
+  "items":
+    {
+      "type": "object",
+      "required": ["timestamp", "result", "id"],
+      "properties": {
+        "timestamp": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+        "result": {"type": "integer", "minimum": -2147483647, "maximum": 2147483647},
+        "id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "error": {"type": "string", "minLength": 1, "maxLength": 1024}
+      },
+      "additionalProperties": false
+    },
+  "additionalItems": false
+}

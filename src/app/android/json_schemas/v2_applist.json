@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "/api/v2/queue",
+  "$comment": "Соответствует всем предъявленным требованиям",
+  "description": "X-MCC-ID: ‹long: kit_id›",
+  "type": "object",
+  "required": ["appsDevice", "appsContainer"],
+  "properties": {
+    "appsDevice": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uid", "title", "versionName", "versionCode", "enabled"],
+        "properties": {
+          "uid": {"type": "string", "minLength": 1, "maxLength": 256},
+          "title": {"type": "string", "minLength": 1, "maxLength": 256},
+          "versionName": {"type": "string", "minLength": 1, "maxLength": 256},
+          "versionCode": {"type": "string", "minLength": 1, "maxLength": 256},
+          "enabled": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "additionalItems": false
+    },
+    "appsContainer": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uid", "title", "versionName", "versionCode", "enabled"],
+        "properties": {
+          "uid": {"type": "string", "minLength": 1, "maxLength": 256},
+          "title": {"type": "string", "minLength": 1, "maxLength": 256},
+          "versionName": {"type": "string", "minLength": 1, "maxLength": 256},
+          "versionCode": {"type": "string", "minLength": 1, "maxLength": 256},
+          "enabled": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "additionalItems": false
+    }
+  },
+  "additionalProperties": false
+}

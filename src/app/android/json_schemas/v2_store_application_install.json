@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "/store/apps/<app_uid>",
+  "$comment": "Соответствует всем предъявленным требованиям",
+  "description": "Content-Type: application/json",
+  "type": "object",
+  "properties": {
+    "user_install": {"type": "boolean"},
+    "is_container": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

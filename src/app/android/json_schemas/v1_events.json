@@ -1,0 +1,624 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "/api/v1/events",
+  "$comment": "Соответствует всем предъявленным требованиям",
+  "description": "Content-Type: application/json;charset=UTF-8, X-MCC-ID: ‹long: kit_id›",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["timestamp", "event"],
+    "properties": {
+
+      "channel": {"enum": ["MDM", "SS"]},
+
+      "timestamp": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+      "event": {"type": "object", "required": ["event_format_version", "event_code"],
+        "properties": {
+
+          "serializedType": {"type": "string", "minLength": 0, "maxLength": 255, "example": ["EventAppInstall"]},
+
+          "event_format_version": {"type": "integer", "minimum": 1, "maximum": 3},
+          "event_code": {"type": "integer", "minimum": 1, "maximum": 254},
+          "event_uuid": {"anyOf": [
+            {"type": "string", "minLength": 36, "maxLength": 36, "example": ["123e4567-e89b-12d3-a456-426655440000"]},
+            {"type": "null"}]},
+          "container": {"type": "boolean"},
+          "container_type": {"enum": ["samsung_knox", "android_work_profile"]},
+          "error_code": {"type": "integer", "minimum": -10000000000, "maximum": 80000},
+          "error_details": {"type": "string", "minLength": 0, "maxLength": 511},
+          "error_type": {"type": "string", "minLength": 0, "maxLength": 511},
+
+          "datetime_old": {"type": "string", "minLength": 16, "maxLength": 40, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+          "datetime_new": {"type": "string", "minLength": 16, "maxLength": 40, "example": ["2017-11-14 07:45:14.0 UTC-02:00"]},
+
+          "locked_by": {
+            "type": "array",
+            "items": {"enum": ["command", "policy", "password", "kiosk"]}, "additionalItems": false
+          },
+
+          "old_sim": {
+            "type": "object",
+            "properties": {
+              "ICCID": {"type": "string", "minLength": 0, "maxLength": 255},
+              "IMSI": {"type": "string", "minLength": 0, "maxLength": 255},
+              "phone": {"type": "string", "minLength": 0, "maxLength": 255}
+            },
+            "additionalProperties": false
+          },
+          "new_sim": {
+            "type": "object",
+            "properties": {
+              "ICCID": {"type": "string", "minLength": 0, "maxLength": 255},
+              "IMSI": {"type": "string", "minLength": 0, "maxLength": 255},
+              "phone": {"type": "string", "minLength": 0, "maxLength": 255}
+            },
+            "additionalProperties": false
+          },
+          "need_block_mob": {"type": "boolean"},
+
+          "profile_type": {"type": "string", "minLength": 0, "maxLength": 511},
+          "profile": {
+            "type": "object",
+            "properties": {
+              "aek": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+              "checksum": {"type": "string", "minLength": 0, "maxLength": 64}
+            },
+            "additionalProperties": false
+          },
+
+          "application_configuration_version": {
+            "type": "object",
+            "properties": {
+              "aek": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+              "checksum": {"type": "string", "minLength": 0, "maxLength": 64},
+              "uid": {"type": "string", "minLength": 0, "maxLength": 128},
+              "container": {"type": "boolean"}
+            },
+            "additionalProperties": false
+          },
+
+          "substitutions_version": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+          "substitution_key": {"type": "string", "minLength": 0, "maxLength": 511},
+          "policy_name": {"type": "string", "minLength": 0, "maxLength": 511},
+
+          "policy_value": {"anyOf": [
+            {"type": "boolean"},
+            {"type": "integer", "minimum": 1, "maximum": 2147483647},
+            {"type": "string", "minLength": 1, "maxLength": 511},
+            {"type": "array", "items": {"type": "boolean"}, "additionalItems": false},
+            {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}, "additionalItems": false},
+            {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 511}, "additionalItems": false},
+
+            { "type": "object",
+              "required": ["type", "fileFormat", "certificate"],
+              "properties": {
+                "type": {"enum": ["Certificate"]},
+                "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                "password": {"type": "string", "minLength": 0, "maxLength": 511}
+              },
+              "additionalProperties": false
+            },
+
+            { "type": "object",
+              "required": ["type", "serverUrl"],
+              "properties": {
+                "type": {"enum": ["ServerConnection"]},
+                "serverUrl": {"type": "string", "minLength": 0, "maxLength": 511},
+                "certificates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["type", "fileFormat", "certificate"],
+                      "properties": {
+                        "type": {"enum": ["Certificate"]},
+                        "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                        "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                        "password": {"type": "string", "minLength": 0, "maxLength": 511}
+                      },
+                      "additionalProperties": false
+                    },
+                    "additionalItems": false
+                  }
+              },
+              "additionalProperties": false
+            },
+
+            { "type": "object",
+              "required": ["type", "connection", "challenge"],
+              "properties": {
+                "type": {"enum": ["ScepServerConfig"]},
+                "subjectName": {"type": "string", "minLength": 0, "maxLength": 511},
+                "challenge": {"type": "string", "minLength": 0, "maxLength": 511},
+                "keySize": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "encryptionAlgorithm": {"type": "string", "minLength": 0, "maxLength": 511},
+                "pollingAttempts": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "pollingTimeoutMinutes": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "connection":
+                  { "type": "object",
+                    "required": ["type", "serverUrl"],
+                    "properties": {
+                      "type": {"enum": ["ServerConnection"]},
+                      "serverUrl": {"type": "string", "minLength": 0, "maxLength": 511},
+                      "certificates": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["type", "fileFormat", "certificate"],
+                            "properties": {
+                              "type": {"enum": ["Certificate"]},
+                              "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                              "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                              "password": {"type": "string", "minLength": 0, "maxLength": 511}
+                            },
+                            "additionalProperties": false
+                          },
+                          "additionalItems": false
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+              },
+              "additionalProperties": false
+            },
+
+            {"type": "array",
+              "items": {
+                "type": "object",
+                "required": ["type", "fileFormat", "certificate"],
+                  "properties": {
+                    "type": {"enum": ["Certificate"]},
+                    "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                    "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                    "password": {"type": "string", "minLength": 0, "maxLength": 511}
+                  },
+                  "additionalProperties": false
+              },
+              "additionalItems": false
+            },
+
+            {"type": "array",
+              "items": {
+                "type": "object",
+                "required": ["type", "serverUrl"],
+                "properties": {
+                  "type": {"enum": ["ServerConnection"]},
+                  "serverUrl": {"type": "string", "minLength": 0, "maxLength": 511},
+                  "password": {"type": "string", "minLength": 0, "maxLength": 511},
+                  "certificates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["type", "fileFormat", "certificate"],
+                      "properties": {
+                        "type": {"enum": ["Certificate"]},
+                        "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                        "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                        "password": {"type": "string", "minLength": 0, "maxLength": 511}
+                      },
+                      "additionalProperties": false
+                    },
+                    "additionalItems": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "additionalItems": false
+            },
+
+            {"type": "array",
+              "items": {
+              "type": "object",
+              "required": ["type", "connection", "challenge"],
+              "properties": {
+                "type": {"enum": ["ScepServerConfig"]},
+                "subjectName": {"type": "string", "minLength": 0, "maxLength": 511},
+                "challenge": {"type": "string", "minLength": 0, "maxLength": 511},
+                "keySize": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "encryptionAlgorithm": {"type": "string", "minLength": 0, "maxLength": 511},
+                "pollingAttempts": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "pollingTimeoutMinutes": {"type": "integer","minimum": 1, "maximum": 2147483647},
+                "connection":
+                  { "type": "object",
+                    "required": ["type", "serverUrl"],
+                    "properties": {
+                      "type": {"enum": ["ServerConnection"]},
+                      "serverUrl": {"type": "string", "minLength": 0, "maxLength": 511},
+                      "certificates": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["type", "fileFormat", "certificate"],
+                            "properties": {
+                              "type": {"enum": ["Certificate"]},
+                              "fileFormat": {"enum": ["PEM", "PKCS12"]},
+                              "certificate": {"type": "string", "minLength": 0, "maxLength": 8192},
+                              "password": {"type": "string", "minLength": 0, "maxLength": 511}
+                            },
+                            "additionalProperties": false
+                          },
+                          "additionalItems": false
+                        }
+                    },
+                    "additionalProperties": false
+                  }
+              },
+              "additionalProperties": false
+            },
+              "additionalItems": false
+            }
+          ]},
+
+          "policy_id": {"type": "string", "minLength": 1, "maxLength": 511},
+
+
+          "application_setting_value": {"type": "string", "minLength": 0, "maxLength": 511},
+          "application_setting_key": {"type": "string", "minLength": 0, "maxLength": 511},
+
+          "app_rule": {
+            "type": "object",
+            "properties": {
+              "aek": {"type": "integer","minimum": 1, "maximum": 2147483647},
+              "checksum": {"type": "string", "minLength": 0, "maxLength": 64},
+              "uid": {"type": "string", "minLength": 0, "maxLength": 128}
+            },
+            "additionalProperties": false
+          },
+
+          "network_type": {"enum": ["cellular", "wifi", "ethernet", "other"]},
+          "ip_address": {"type": "string", "minLength": 7, "maxLength": 32},
+          "details": {"type": "string", "minLength": 0, "maxLength": 511},
+
+          "assignment_entity": {
+            "type": "object",
+            "properties": {
+              "type": {"enum": ["profile", "app_cfg", "app_rule"]},
+              "aek": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+              "checksum": {"type": "string", "minLength": 0, "maxLength": 128}
+            },
+            "additionalProperties": false
+          },
+
+          "app_uid": {"anyOf": [
+            {"enum": ["profile", "app_cfg", "app_rule"]},
+            {"type": "null"}]},
+          "object_type": {"enum": ["APP", "FILE"]},
+          "file_path": {"anyOf": [
+            {"type": "string", "minLength": 0, "maxLength": 511},
+            {"type": "null"}]},
+          "app_admin": {"anyOf": [
+            {"type": "boolean"},
+            {"type": "null"}]},
+          "app_in_container": {"type": "boolean"},
+          "threat_name": {"anyOf": [
+            {"type": "string", "minLength": 0, "maxLength": 511},
+            {"type": "null"}]},
+          "threat_type": {"enum": ["ADWARE", "MALWARE", "RISKWARE", "TROJAN_BANKER", "UDS_MALWARE", "UDS_PHISHING"]},
+          "security_level": {"enum": ["LOW", "MEDIUM", "HIGH", "INFO"]},
+          "protect_status": {"enum": ["on", "threats not eliminated", "off", "av_not_installed"]},
+          "part": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+
+          "data": {
+            "type": "object",
+            "properties": {
+
+              "LocationCollectionStatus": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254, "examples": ["profile_not_assigned"]},
+                {"type": "null"}]},
+              "AVDBUpdateDate": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "EnrollmentSpecificId": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "PasswordTokenStatus": {"anyOf": [
+                {"enum": ["unsupported", "active", "inactive"]},
+                {"type": "null"}]},
+              "KNOXAvailable": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "ConnectionType": {"anyOf": [
+                {"enum": ["GPRS", "OTHER", "not_defined"]},
+                {"type": "null"} ] },
+              "SIMOwnership": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "RoamingState": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "IMSI": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "ICCID": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "PhoneNumber": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "HomeCarrierNetwork": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "HomeMCC": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "HomeMNC": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "DeviceType": {"anyOf": [
+                {"enum": ["Smartphone", "Tablet", "Other", "Gardliner"]},
+                {"type": "null"} ] },
+              "DeviceModel": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "IMEI": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "UDID": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "SerialNumber": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "ContainerType": {"anyOf": [
+                {"enum": ["samsung_knox", "android_work_profile", "none"]},
+                {"type": "null"}]},
+              "Platform": {"anyOf": [
+                {"enum": ["iPhone OS", "Android", "Tizen", "SailfishOS", "Guardliner", "AuroraOS"]},
+                {"type": "null"}]},
+              "Version": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "DeviceOwnership": {"anyOf": [
+                {"enum": ["Corporate", "Personal", "None"]},
+                {"type": "null"}]},
+              "MonitorVersion": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "DOPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "DAPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "POPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "KNOXPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "KNOXPremiumPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "SYSTEMPrivilege": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "IP": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "Supervised": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "KioskMode": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "PasswordPresent": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "AVProtection": {"anyOf": [
+                {"enum": ["on", "off", "threats not eliminated", "av_not_installed"]},
+                {"type": "null"}]},
+              "AVDBUpdatуDate": {"anyOf": [
+                  {"type": "string", "minLength": 0, "maxLength": 32, "example": ["2017-11-14 07:45"]},
+                  {"type": "null"}]},
+              "LastScanAV":{"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 32, "example": ["2017-11-14 07:45"]},
+                {"type": "null"}]},
+              "WiFiMAC": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "BluetoothMAC": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "AvailableRAM": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "AvailableSpace": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "IsCloudBackupEnabled": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "MobileOperatorName": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "CurrentMCC": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "CurrentMNC": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "iTunesStoreAccountHash": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "StorageEncrypted": {"anyOf": [
+                {"enum": ["Unsupported", "Full disk", "File based"]},
+                {"type": "null"}]},
+              "IsLocationEnabled": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "IsLostModeEnabled": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "PasscodeCompliant": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "PasscodeCompliantWithProfiles": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "AndroidAPILevel": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "KNOXАvailable": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "KNOXAPIVersion": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "ScreenHeight": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "ScreenWidth": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+              "SecurityPatchLevel": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "OSArchitecture": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "ManagementStrategy": {"anyOf": [
+              {"enum": ["personal_work_profile_management","corporate_work_profile_management",
+                "device_management", "device_management_knox", "device_and_knox_container_management"]},
+                {"type": "null"}]},
+              "LinuxDistribution": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "LinuxKernelVersion": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "LinuxDistributionVersion": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+
+              "Charge": {"anyOf": [
+                {"type": "number", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"} ] },
+
+              "DeviceName": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 511},
+                {"type": "null"}]},
+              "EACSPreflight": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "EASDeviceIdentifier": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 254},
+                {"type": "null"}]},
+              "IsDeviceLocatorServiceEnabled": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "IsDoNotDisturbInEffect": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "IsMultiUser": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "IsNetworkTethered": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "iTunesStoreAccountIsActive": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "LastCloudBackupDate": {"anyOf": [
+                {"type": "string", "minLength": 16, "maxLength": 64, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+                {"type": "null"}]},
+              "ModemFirmwareVersion": {"anyOf": [
+                {"type": "string", "minLength": 16, "maxLength": 64, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+                {"type": "null"}]},
+              "PersonalHotspotEnabled": {"anyOf": [
+                {"type": "boolean"},
+                {"type": "null"}]},
+              "ProductName": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 64, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+                {"type": "null"}]},
+              "SoftwareUpdateDeviceID": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 64, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+                {"type": "null"}]},
+              "RecommendationsCadence": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"}]},
+              "TimeZone": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 64, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+                {"type": "null"}]},
+              "HardwareEncryptionCaps": {"anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                {"type": "null"}]},
+              "SecurityPatchState": {"anyOf": [
+                {"enum": ["security patch","not a security patch", "unknown, security patch or not"]},
+                {"type": "null"}]},
+              "SecurityPatchReceivedTime": {"anyOf": [
+                {"type": "string", "minLength": 0, "maxLength": 64, "example": ["2018-09-13 06:57:32"]},
+                {"type": "null"}]}
+            },
+            "additionalProperties": false
+          },
+
+          "token": {"type": "string", "minLength": 8, "maxLength": 511},
+
+          "apps": {
+            "type": "array",
+            "items":
+              {
+                "type": "object",
+                "properties": {
+                  "uid": {"type": "string", "minLength": 0, "maxLength": 511},
+                  "name": { "type": "string", "minLength": 0, "maxLength": 511},
+                  "version_code": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                  "version_name": {"type": "string", "minLength": 0, "maxLength": 511},
+                  "enabled": {"type": "boolean"},
+                  "reputation": {"enum": ["SYSTEM", "TRUSTED", "UNKNOWN", "UNTRUSTED"]},
+                  "is_threat": {"type": "boolean"},
+                  "can_uninstall": {"type": "boolean"}
+                },
+                "additionalProperties": false
+              },
+            "additionalItems": false
+          },
+
+          "iccid": {"type": "string", "minLength": 19, "maxLength": 19},
+          "imsi": {"type": "string", "minLength": 15, "maxLength": 15},
+          "server_type": {"enum": ["MDMServer", "SocketServer", "SCEPServer"]},
+          "server_url": {"type": "string", "minLength": 0, "maxLength": 511},
+          "time": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+          "time_zone_minutes": {"type": "integer", "minimum": -720, "maximum": 840},
+          "horizontal_accuracy_meters": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+          "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+          "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+          "provider": {"anyOf": [
+            {"enum": ["GPS", "NETWORK", "FUSED", "PASSIVE"]},
+            {"type": "null"}]},
+
+          "app": {
+            "type": "object",
+            "properties": {
+              "uid": {"type": "string", "minLength": 0, "maxLength": 511},
+              "name": {"type": "string", "minLength": 0, "maxLength": 511},
+              "version_code": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+              "version_name": {"type": "string", "minLength": 0, "maxLength": 511},
+              "type": {"enum": ["corporate", "incorporate"]},
+              "enabled": {"enum": [0, 1]},
+              "can_disable": {"enum": [0, 1]},
+              "can_delete": {"enum": [0, 1]},
+              "is_managed": {"enum": [0, 1]},
+              "reputation": {"enum": ["SYSTEM", "TRUSTED", "UNKNOWN", "UNTRUSTED"]},
+              "is_threat": {"enum": [0, 1]},
+              "datetime_old": {"type": "string", "minLength": 16, "maxLength": 40, "example": ["2018-09-13 06:57:32.0 UTC+03:00"]},
+              "datetime_new": {"type": "string", "minLength": 16, "maxLength": 40, "example": ["2017-11-14 07:45:14.0 UTC-02:00"]},
+
+              "locked_by": {
+                "type": "array",
+                "items": {
+                  "enum": ["command", "policy", "password", "kiosk"]
+                },
+                "additionalItems": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
+  "additionalItems": false
+}
