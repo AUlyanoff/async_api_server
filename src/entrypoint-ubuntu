@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+set -x
+
+exec /usr/local/bin/log.sh "$@"
