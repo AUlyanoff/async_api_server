@@ -1,0 +1,13 @@
+.gitignore
+.idea
+/venv*
+.venv*
+/config/*_dev.*
+*.pyc
+*.pyo
+__pycache__
+bin
+obj
+.vscode
+/config/*.crt
+/config/*.key
