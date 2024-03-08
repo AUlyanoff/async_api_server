@@ -1,0 +1,99 @@
+#db:
+db:     #ССО2
+  type: postgresql
+  user: sphone
+  password: 111
+  host: 10.17.7.47
+  port: 5432
+  name: sphone
+  checkversion: False
+#db:     # Щиголь
+#  type: postgresql
+#  host: 10.17.7.96
+#  port: 5432
+#  name: sphone
+#  user: sphone
+#  password: 111
+#  checkversion: false
+#  sslmode: verify-full
+    # disable     - шифрование отключено
+    # allow       - шифрование включится, если этот потребует БД
+    # prefer      - требование МДМ на включение шифрования
+    # require     - требуется обязательно, сеть доверенная
+    # verify-ca   - требуется обязательно, к БД подключится кто угодно с сертификатом
+    # verify-full - требуется обязательно, полная взаимная аутентификация
+  # sslrootcert: d:\projects\combat\MdmServer-v4\config\root.crt      # корневой сертификат smapi, авторизует базу
+  # sslcert: d:\projects\combat\MdmServer-v4\config\postgresql.crt    # конечный сертификат, подписанный корневым серт. базы, авторизует smapi
+  # sslkey: d:\projects\combat\MdmServer-v4\config\postgresql.key     # закрытый ключ (расшифровывает данные базы)
+  # sslrootcert: /config/root.crt      # корневой сертификат smapi, авторизует базу
+  # sslcert: /config/postgresql.crt    # конечный сертификат, подписанный корневым серт. базы, авторизует smapi
+  # sslkey: /config/postgresql.key     # закрытый ключ (расшифровывает данные базы)
+#db:      # база ссо1
+#  # АРМ и Портал 10.17.7.41:8443
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.48
+#  port: 5432
+#  name: sphone
+#  checkversion: False
+#db:     #sl2.safephone4.ru
+#  type: postgresql
+#  user: sphone
+#  password: Duk-@ltv6-fjM7k
+#  host: 185.172.137.37
+#  port: 5432
+#  name: sphone
+#  checkversion: False
+#db:     #Сберстенд
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 172.18.0.200
+#  port: 5432
+#  name: sphone
+#db:     #Руденко
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.72
+#  port: 5432
+#  name: sphone
+#  checkversion: False
+#db:
+#  # 70-я Белоголовый
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.70
+#  port: 5432
+#  name: sphone
+#  checkversion: False
+#db:
+#  # 69-я Рысев
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.69
+#  port: 5432
+#  name: sphone
+#db:
+#  # 64-я
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.64
+#  port: 5432
+#  name: sphone
+#  checkversion: False
+#db:  # demo.safe-mobile.ru
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 185.172.136.171
+#  port: 5432
+#  name: sphone
+#  # sslmode: require
+#  # sslrootcert: /config/root.crt
+#  # sslcert: /config/postgresql.crt
+#  # sslkey: /config/postgresql.key

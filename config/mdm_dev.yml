@@ -1,0 +1,17 @@
+mdm:
+  log: D
+  timing: F
+  log_format: '%(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
+#  log_format: '%(asctime)s %(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
+
+  uvicorn:
+    log: error
+    host: 0.0.0.0
+    port: 8000
+    workers: 1
+
+  db_pool:
+    minconn: 10
+    maxconn: 30
+
+  sowa: off

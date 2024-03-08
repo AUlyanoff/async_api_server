@@ -1,0 +1,15 @@
+# -------------------------------
+# Конфиг по умолчанию для SSO2 без mTLS до базы
+db:
+  type: postgresql
+  host: 10.17.7.47
+  port: 5432
+  name: sphone
+  user: sphone
+  password: 111
+  checkversion: false
+  sslmode: disable
+#  sslrootcert: /Users/hosglial/Work/Projects/MdmServer-v3/config/root.crt
+#  sslcert: /Users/hosglial/Work/Projects/MdmServer-v3/config/postgresql.crt
+#  sslkey: /Users/hosglial/Work/Projects/MdmServer-v3/config/postgresql.key
+# -------------------------------
