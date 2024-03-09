@@ -4,7 +4,7 @@ import sys
 from os import environ
 from sys import exit
 
-from config import config as cfg
+from config_save import config as cfg
 from database import db
 
 logger = logging.getLogger(__name__)  # свой собственный логер

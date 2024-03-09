@@ -1,12 +1,23 @@
-#db:
-db:     #ССО2
-  type: postgresql
-  user: sphone
-  password: 111
-  host: 10.17.7.47
+db:     # удалённая база Ульянова
+  name: neondb
+  db_schema: public
+  host: ep-snowy-limit-67291163-pooler.eu-central-1.aws.neon.tech
   port: 5432
-  name: sphone
-  checkversion: False
+  user: AUlyanoff
+  password: qRjCuQhx87Nb
+#  #"Эта база лежит на бесплатном сервисе размещения PostgreSQL где-то у американцев на Neon
+#  #https://console.neon.tech/app/projects/long-voice-42808384
+#  #авторизация через gitHub - то есть идешь на Neon, но авторизуешься своим gitHub (в это время ты должен быть авторизован)
+#  #postgres://AUlyanoff:qRjCuQhx87Nb@ep-snowy-limit-67291163-pooler.eu-central-1.aws.neon.tech/neondb
+#  #postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+#db:     #ССО2
+#  type: postgresql
+#  user: sphone
+#  password: 111
+#  host: 10.17.7.47
+#  port: 5432
+#  name: sphone
+#  checkversion: False
 #db:     # Щиголь
 #  type: postgresql
 #  host: 10.17.7.96

@@ -6,7 +6,7 @@ import jsonschema
 from fastapi import Request, HTTPException
 
 from utils.json_utils import isjson
-from config import config
+from config_save import config
 from utils.log.utils import trunc_str
 
 logger = logging.getLogger(__name__)

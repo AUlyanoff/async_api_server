@@ -5,7 +5,6 @@
 class MtlsException(Exception):
     stat = None
     err = None
-    proc = None
 
     def __init__(self, err, stat):
         self.stat = stat

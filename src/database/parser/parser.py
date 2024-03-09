@@ -6,7 +6,7 @@ import pickle
 import asyncpg
 from jinja2 import Environment, FileSystemLoader
 
-from config import config
+from config_save import config
 from database import db
 from database.parser.entities import Procedure
 from database.parser.parse_database import parse_db

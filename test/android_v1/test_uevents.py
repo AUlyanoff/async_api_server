@@ -4,7 +4,7 @@ import json
 
 from database import db
 from test.conftest import DefaultOut
-from config import config
+from config_save import config
 
 
 def test_err_add_json(client):

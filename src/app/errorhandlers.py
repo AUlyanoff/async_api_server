@@ -20,9 +20,15 @@ async def pydantic_exception_handler(request: Request, exc: RequestValidationErr
        - добавляет свои обработки и
        - перевозбуждает исключение под именем RequestValidationError
     """
+    ll = f'\n\t<~\t\tPydantic validation error: {request.url.path}, {request.scope["endpoint"].__name__}'
+
+    ls = list()
     if 'pydantic' in str(exc.errors()).lower():
         stat = 400
         response = PlainTextResponse(content='Bad request. Wrong body', status_code=stat)
+        for error in exc.errors():
+            ls.append(f"\t\t\t- {str(error.get('type'))[:16]:<16} "
+                      f"{(': ').join(error.get('loc')):<20} = {str(error.get('input')):<12} {error.get('msg')}.")
     elif 'json_invalid' in str(exc.errors()).lower():
         stat = 400
         response = PlainTextResponse(content='Bad request. Invalid json', status_code=stat)
@@ -31,8 +37,7 @@ async def pydantic_exception_handler(request: Request, exc: RequestValidationErr
         stat = 500
         response = PlainTextResponse(content='Unexpected RequestValidationError', status_code=stat)
 
-    ll = f'\n\t<~\t\tPydantic validation error: {request.url.path}, {request.scope["endpoint"].__name__}'
-    ll += f'\n\tbody\terror {trunc_str(exc.errors())}'
+    ll += '\n'.join(ls)
     ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа

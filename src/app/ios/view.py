@@ -4,8 +4,9 @@ import logging
 from fastapi import Request, APIRouter
 
 from database import db, DBConnection
+from utils.log.req_resp_log import LogReqRes
 
-ios_router = APIRouter()
+ios_router = APIRouter(route_class=LogReqRes)
 
 logger = logging.getLogger(__name__)
 

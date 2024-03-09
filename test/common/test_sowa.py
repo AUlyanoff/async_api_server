@@ -4,7 +4,7 @@ import json
 from typing import NamedTuple
 
 import database
-from config import config
+from config_save import config
 from test.conftest import DefaultOut
 
 
