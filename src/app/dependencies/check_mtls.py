@@ -4,7 +4,7 @@ import logging
 
 from fastapi import Request
 
-from database import db
+# from database import db
 from app.exceptions import MtlsException
 
 logger = logging.getLogger(__name__)

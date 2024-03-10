@@ -3,7 +3,7 @@ from sys import exc_info
 from datetime import datetime
 from logging import getLogger
 
-from database import db
+# from database import db
 
 logger = getLogger(__name__)
 

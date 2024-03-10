@@ -9,18 +9,18 @@ from dataclasses import dataclass
 from fastapi.responses import PlainTextResponse
 from fastapi import Request, Depends
 
-from database import DBConnection, db
+# from database import DBConnection, db
 from app.android.api.v1.uevents.models import EventDesc
 from app.android.api.v1.routes import v1
 from app.android.dependencies.check_schemas import CheckJsonSchema
-from app.android.dependencies.check_kit_id import check_kit_id
+# from app.android.dependencies.check_kit_id import check_kit_id
 from app.android.dependencies.check_mime import check_mime
 from app.dependencies.check_mtls import CheckMtlsSert
 from utils.log.utils import trunc_str
 
 from utils.paths import json_schema_path
 from app.android.api.v1.uevents.monitor_service import set_mob_param
-from app.android.api.v1.uevents.events_service import add_universal_event
+# from app.android.api.v1.uevents.events_service import add_universal_event
 
 """
 Универсальные события передаются в requestbody http-запроса.
@@ -67,58 +67,58 @@ def find_guardliner(user_agent) -> Optional[GuardlinerData]:
     return result
 
 
-@v1.post("/events", dependencies=[
-    Depends(check_kit_id),                                                              # проверка номера комплекта
-    Depends(CheckJsonSchema(schema_path=json_schema_path.joinpath('v1_events.json'))),  # вызов Совы
-    Depends(check_mime),                                                                # проверка content-type
-    Depends(CheckMtlsSert(kit_id=None))                                                 # проверка сертификата комплекта
-])
-async def register_events(request: Request, conn: DBConnection, events: List[EventDesc]):
-    """API приёма универсальных событий"""
-    api_path, resp, stat, ll = request.url.path, 'OK', 201, ' OK, events added'  # ll - строка лога (log line)
-    kit_id = int(request.headers.get("X-MCC-ID"))
-    utcnow = datetime.utcnow()
-
-    logger.info(f"\n\t=>\t\t{api_path} ({register_events.__doc__.strip()}), kit_id={kit_id} started")
-
-    # Изменение статуса активности клиента (connected, disconnected или long_been_disconnected)
-    await db.sp_monitor_db_upd_activity(conn, utcnow, kit_id, 'connected')
-
-    # Сначала обработаем браслет, для него есть отдельная ХП
-    guard_liner: Optional[GuardlinerData] = find_guardliner(request.headers.get("user-agent"))
-    if guard_liner:
-        try:
-            # Обновление статуса подключения устройства. Заполнение mobile_connection.
-            # Регистрация события <Подключение МСК>, если не было 15 минут активности до этого
-            await db.sp_event_imdm_add_connect(conn, utcnow, kit_id, utcnow, '', 'not_defined')
-
-            await set_mob_param(conn,  # Регистрация параметров устройства
-                                kit_id=kit_id,
-                                os_name=guard_liner.model_name + " " + guard_liner.model_version,
-                                model_name=guard_liner.model_name + " " + guard_liner.model_version,
-                                serial_num=guard_liner.serial_number)
-            ll += f"\n\t\t\tGuardliner = {guard_liner.__dict__}"
-        except Exception as e:
-            logger.exception(f"kit_id={kit_id}: Not save mob_param: {str(guard_liner)}", e)
-            raise
-
-    # Запишем события в БД (ts - это timestamp)
-    for event in events:
-        try:
-            content = event.model_dump().get("event")
-            ts_kit = event.model_dump().get('timestamp')
-            ts_kit = datetime.fromtimestamp(float(ts_kit) / 1000) if isinstance(ts_kit, int) else ts_kit
-            await add_universal_event(conn, ts_kit, kit_id, content)
-            ll += "\n\t\t\t" + trunc_str(f"event={content}, timestamp={ts_kit}")
-
-        except Exception as e:
-            logger.exception(f"\n\t\t\tkit_id {kit_id} Not save uevents\n\t\t\t{trunc_str(event)}", e)
-            raise
-
-    ll = f"\n\t<=\t\t{api_path}, kit_id={kit_id} ended" + ll
-    logger.info(ll) if 200 <= stat < 300 else logger.error(ll)
-
-    return PlainTextResponse(resp, status_code=stat)
-
-if __name__ == '__main__':
-    pass
+# @v1.post("/events", dependencies=[
+#     Depends(check_kit_id),                                                              # проверка номера комплекта
+#     Depends(CheckJsonSchema(schema_path=json_schema_path.joinpath('v1_events.json'))),  # вызов Совы
+#     Depends(check_mime),                                                                # проверка content-type
+#     Depends(CheckMtlsSert(kit_id=None))                                                 # проверка сертификата комплекта
+# ])
+# async def register_events(request: Request, conn: DBConnection, events: List[EventDesc]):
+#     """API приёма универсальных событий"""
+#     api_path, resp, stat, ll = request.url.path, 'OK', 201, ' OK, events added'  # ll - строка лога (log line)
+#     kit_id = int(request.headers.get("X-MCC-ID"))
+#     utcnow = datetime.utcnow()
+#
+#     logger.info(f"\n\t=>\t\t{api_path} ({register_events.__doc__.strip()}), kit_id={kit_id} started")
+#
+#     # Изменение статуса активности клиента (connected, disconnected или long_been_disconnected)
+#     await db.sp_monitor_db_upd_activity(conn, utcnow, kit_id, 'connected')
+#
+#     # Сначала обработаем браслет, для него есть отдельная ХП
+#     guard_liner: Optional[GuardlinerData] = find_guardliner(request.headers.get("user-agent"))
+#     if guard_liner:
+#         try:
+#             # Обновление статуса подключения устройства. Заполнение mobile_connection.
+#             # Регистрация события <Подключение МСК>, если не было 15 минут активности до этого
+#             await db.sp_event_imdm_add_connect(conn, utcnow, kit_id, utcnow, '', 'not_defined')
+#
+#             await set_mob_param(conn,  # Регистрация параметров устройства
+#                                 kit_id=kit_id,
+#                                 os_name=guard_liner.model_name + " " + guard_liner.model_version,
+#                                 model_name=guard_liner.model_name + " " + guard_liner.model_version,
+#                                 serial_num=guard_liner.serial_number)
+#             ll += f"\n\t\t\tGuardliner = {guard_liner.__dict__}"
+#         except Exception as e:
+#             logger.exception(f"kit_id={kit_id}: Not save mob_param: {str(guard_liner)}", e)
+#             raise
+#
+#     # Запишем события в БД (ts - это timestamp)
+#     for event in events:
+#         try:
+#             content = event.model_dump().get("event")
+#             ts_kit = event.model_dump().get('timestamp')
+#             ts_kit = datetime.fromtimestamp(float(ts_kit) / 1000) if isinstance(ts_kit, int) else ts_kit
+#             await add_universal_event(conn, ts_kit, kit_id, content)
+#             ll += "\n\t\t\t" + trunc_str(f"event={content}, timestamp={ts_kit}")
+#
+#         except Exception as e:
+#             logger.exception(f"\n\t\t\tkit_id {kit_id} Not save uevents\n\t\t\t{trunc_str(event)}", e)
+#             raise
+#
+#     ll = f"\n\t<=\t\t{api_path}, kit_id={kit_id} ended" + ll
+#     logger.info(ll) if 200 <= stat < 300 else logger.error(ll)
+#
+#     return PlainTextResponse(resp, status_code=stat)
+#
+# if __name__ == '__main__':
+#     pass

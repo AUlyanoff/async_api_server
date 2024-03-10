@@ -70,38 +70,6 @@ def setup_log(logging_level: int, timing_level: int, log_format: str) -> None:
     logging.basicConfig(level=logging_level, handlers=[stdout_handler], force=True)
 
 
-def set_logger_levels(exclusions):
-    """
-    Устанавливает исключения из общего логирования, полученные для некоторых логеров из iosmdm.yml из секции loggers
-    exclusions - список словарей вида [{'name': [<имена логеров>], 'level': <новый уровень логирования>}]
-    """
-    if exclusions:                                      # исключения из конфига
-        count_exclusions = 0
-        for exclusion in exclusions:
-            loggers_cfg: str = exclusion.get("name")    # строка из конфига - список имён логеров из словаря исключений
-            if "," in loggers_cfg:                      # строку со списком преобразуем в настоящий список Питона
-                loggers = loggers_cfg.split(",")        # разделитель запятая
-            elif " " in loggers_cfg:                    # или пробел
-                loggers = loggers_cfg.split(" ")
-            else:
-                loggers = [loggers_cfg]                 # или список был из одного элемента
-
-            loggers = list(set([_l.strip() for _l in loggers if _l]))   # убираем окружающие пробелы и дубликаты
-            logger_level = str(exclusion.get("level")).upper()     # берём уровень логирования из текущего исключения
-            logger_to_file: bool = bool(exclusion.get("to_file"))  # выясняем, надо ли писать логеру в отдельный файл
-
-            for loger in loggers:                      # идём по списку логеров
-                if loger and logger_level:             # если в исключении был уровень логирования
-                    lggr = logging.getLogger(loger)    # то берём (при необходимости создаём) логер
-                    lggr.level = logging_levels.get(logger_level, 10)  # и УСТАНАВЛИВАЕМ ему УРОВЕНЬ из исключения
-                    count_exclusions += 1
-                    if logger_to_file:                  # если надо, этот логер будет писать в файл
-                        handler = logging.StreamHandler(sys.stderr)
-                        lggr.addHandler(handler)
-        if count_exclusions:
-            logger.info(f"Logging level exceptions set for {count_exclusions} loggers.")
-
-
 def log_loggers():
     """Логирование логеров, перечисление их количества"""
     log_logger_var = logging.getLogger("log_logger")

@@ -3,20 +3,23 @@ import sys
 import logging
 import yaml
 
-from pydantic import BaseModel, ConfigDict, StrictStr, ValidationError
+from pydantic import BaseModel, ConfigDict, StrictStr, ValidationError, computed_field
 from typing import Literal, ClassVar
 
-from utils.base_config.base_config import BaseAppConfig
 from utils.paths import BASE_PATH
+from utils.consts import logging_levels
 
 logger = logging.getLogger(__name__)
+LogTypes = Literal['d', 't', 'debug', 'i', 'info', 'e', 'error', 'c', 'critical', 'f', 'fatal', 'w', 'warning', 'warn',
+                   'D', 'T', 'DEBUG', 'I', 'INFO', 'E', 'ERROR', 'C', 'CRITICAL', 'F', 'FATAL', 'W', 'WARNING', 'WARN']
 
 
 class Uvicorn(BaseModel):
     """ Описание параметра uvicorn в app[_dev].yml """
     model_config = ConfigDict(extra='forbid')  # неописанные параметры запрещены
+
     # все параметры необязательные, и если опущены, примут значения по умолчанию как здесь указано
-    log: BaseAppConfig.LogTypes = 'error'
+    log: LogTypes = 'error'
     workers: int = 1
     host: str | None = '0.0.0.0'
     port: int | None = 8000
@@ -25,13 +28,26 @@ class Uvicorn(BaseModel):
 class APPconfig(BaseModel):
     """ Дата-класс для проверки параметров конфига приложения """
     model_config = ConfigDict(extra='forbid')   # неописанные параметры запрещены
-    LogTypes: ClassVar = Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'FATAL']
+    # LogTypes: ClassVar = Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'FATAL']
 
     # все параметры необязательные
     log: LogTypes = 'DEBUG'
     timing: LogTypes = 'CRITICAL'
     log_format: StrictStr = '%(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
     uvicorn: Uvicorn = Uvicorn()                       # параметр конфига uvicorn - это словарь
+
+    # ============================== Вычисляемые параметры конфига приложений ==========================
+    @computed_field
+    @property
+    def log_int(self) -> int:
+        """Преобразует уровень логирования log из строки в IntEnum"""
+        return logging_levels.get(self.log.upper(), logging.DEBUG)
+
+    @computed_field
+    @property
+    def timing_int(self) -> int:
+        """Преобразует уровень логирования timing из строки в IntEnum"""
+        return logging_levels.get(self.timing.upper(), logging.FATAL)
 
     def __init__(self):
         """Инициализация класса конфига БД"""

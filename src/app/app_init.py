@@ -11,10 +11,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.android.api.v1.routes import v1
 from app.android.api.v2.routes import v2
-from app.errorhandlers import check_rc_exception_handler, database_exception_handler, pydantic_exception_handler, \
-    check_mtls_exception_handler
+# from app.errorhandlers import check_rc_exception_handler, database_exception_handler, pydantic_exception_handler, \
+#     check_mtls_exception_handler
+from app.errorhandlers import pydantic_exception_handler, check_mtls_exception_handler
 from app.ios.view import ios_router
-from database.exceptions import ResultCheckException, DatabaseException
 from app.exceptions import MtlsException
 from utils.log.req_duration import request_duration
 from utils.log.req_id import generate_req_id
@@ -23,10 +23,6 @@ from asyncpg import __version__ as asyncpg_ver
 from config.db import db_cfg
 from config.app import cfg
 
-from config_save import config
-from database import db
-from utils.boot_utils import check_application_version
-from utils.boot_utils import get_components_versions
 from utils.log.init import setup_log
 from app.app_ver import app_ver
 
@@ -63,8 +59,6 @@ app.middleware('http')(generate_req_id)  # генерация асинх кон�
 
 # noinspection PydanticTypeChecker
 app.add_exception_handler(RequestValidationError, pydantic_exception_handler)
-app.add_exception_handler(DatabaseException, database_exception_handler)
-app.add_exception_handler(ResultCheckException, check_rc_exception_handler)
 app.add_exception_handler(MtlsException, check_mtls_exception_handler)
 
 app.include_router(ios_router, tags=['iOS'])  # регистрация роутов iOS
