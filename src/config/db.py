@@ -10,7 +10,7 @@ from typing_extensions import Annotated
 
 from utils.paths import BASE_PATH
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('boot')
 
 
 class DBconfig(BaseModel):
@@ -21,7 +21,7 @@ class DBconfig(BaseModel):
     # обязательные параметры
     db_schema: StrictStr                                    # строгая строка - запретим приведение типов numeric -> str
     user: StrictStr
-    password: Union[SecretStr, int]
+    password: Union[str, int]
     host: Union[IPvAnyAddress, AnyUrl, StrictStr]           # IP-адрес v4/v6, или любой url, или нецифровая строка
     port: PositiveInt                                       # натуральное число
     name: StrictStr
@@ -37,8 +37,7 @@ class DBconfig(BaseModel):
 
     def __init__(self):
         """Инициализация класса конфига БД"""
-        _db = self.load_db()
-        super().__init__(**_db)
+        super().__init__(**self.load_db())
 
     @staticmethod
     def load_db():
@@ -52,7 +51,7 @@ class DBconfig(BaseModel):
                 sys.tracebacklimit = 0
                 raise FileNotFoundError(f'DB config not found: {db_yaml_path}')
 
-        logger.fatal(db_yaml_path.name + ' found and will be used for database connect')
+        logger.info(db_yaml_path.name + ' found and will be used for database connect')
 
         with open(db_yaml_path) as f:  # создаём конфиг-словарь базы
             db_dict = yaml.safe_load(f).get('db')
@@ -63,15 +62,15 @@ class DBconfig(BaseModel):
         return db_dict
 
 
-if __name__ == 'config.db':
-    try:
-        db_cfg = DBconfig()
-    except ValidationError as e:
-        ll = list()
-        for error in e.errors():
-            ll.append(f"\t\t\t- {str(error.get('type'))[:16]:<16} "
-                      f"{': '.join(error.get('loc')):<20} = {str(error.get('input')):<12} {error.get('msg')}.")
-        from warnings import warn_explicit
-        warn_explicit("\n" + "\n".join(ll) + "\nError loading DB-config, fix it. Server stopped now...",
-                      category=UserWarning, filename='', lineno=-1)
-        exit(-1)
+try:
+    db_cfg = DBconfig()
+except ValidationError as e:
+    # красиво отформатируем и напечатаем ошибки в конфиге db[_dev].yml
+    ll = list()
+    for error in e.errors():
+        ll.append(f"\t\t\t- {str(error.get('type'))[:16]:<16} "
+                  f"{': '.join(error.get('loc')):<20} = {str(error.get('input')):<12} {error.get('msg')}.")
+    from warnings import warn_explicit
+    warn_explicit("\n" + "\n".join(ll) + "\nError loading DB-config, fix it. Server stopped now...",
+                  category=UserWarning, filename='', lineno=-1)
+    exit(-1)
