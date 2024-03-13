@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
-from sqlalchemy import URL, inspect, MetaData, create_engine
-import asyncio
+from sqlalchemy import URL, inspect, MetaData, create_engine, Inspector
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 # from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import declarative_base
 # from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
 from asyncpg.exceptions import InternalServerError
 
 from config.db import db_cfg
@@ -30,17 +28,17 @@ async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_
 
 async def db_init():
     """Пытаемся связаться с базой и залогировать параметры успешной попытки"""
-    def get_table_names(conn):
+    def get_table_names(connection):
         """Читаем список всех таблиц"""
-        inspector = inspect(conn)
+        inspector = inspect(connection)
         return inspector.get_table_names()
 
-    async def sync_async(request):
+    async def sync_async(sync_func):
         """ Inspector асинхронно не работает, см. https://docs.sqlalchemy.org/en/20/errors.html#no-inspection-available
             Поэтому вызываем синхронную сущность из асинхронного коннекта синхронным методом .run_sync
         """
         async with async_engine.connect() as conn:
-            result = await conn.run_sync(request)
+            result = await conn.run_sync(sync_func)
             # await conn.run_sync(Base.metadata.reflect(async_engine))
             # await conn.run_sync(Base.metadata.drop_all)
         return result

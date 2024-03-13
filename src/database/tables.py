@@ -1,10 +1,27 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, Text, DateTime     # , LargeBinary
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import MetaData, Table, Column, Integer, String, Text, DateTime, LargeBinary
+# from sqlalchemy.orm import declarative_base
 from sqlalchemy.dialects import postgresql
+from database.init import Base
+
+# # СПОСОБ 2
+# # объект для ВСЕХ таблиц базы для наследования классов таблиц -------------------------------------------------------
+# all_db_tables = declarative_base()
+
+# описание таблицы для Пользователей
+class Users(Base):
+    __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}  # продолжать, если таблица существует
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(128), nullable=False)
+    email = Column(String(128), nullable=False)
+    psw = Column(String(256), nullable=False)
+    avatar = Column(postgresql.BYTEA, nullable=True)
+    time = Column(DateTime, nullable=False)
+
 
 # СПОСОБ 1
 # служебный объект метаданных для описания таблиц ---------------------------------------------------------------------
-metadata = MetaData()
+# metadata = MetaData()
 
 # # Описание таблицы для Главного Меню
 # main_menu = Table('mainmenu', metadata,
@@ -13,13 +30,13 @@ metadata = MetaData()
 #                   Column('url', String(256), nullable=False)
 #                   )
 # # Описание таблицы для Статей
-posts = Table('posts', metadata,
-              Column('id', Integer(), primary_key=True),
-              Column('title', String(256), nullable=False),
-              Column('text', Text, nullable=False),
-              Column('url', String(256), nullable=False),
-              Column('time', DateTime, nullable=False)
-              )
+# posts = Table('posts', metadata,
+#               Column('id', Integer(), primary_key=True),
+#               Column('title', String(256), nullable=False),
+#               Column('text', Text, nullable=False),
+#               Column('url', String(256), nullable=False),
+#               Column('time', DateTime, nullable=False)
+#               )
 
 # описание таблицы для Пользователей
 # users = Table('users', metadata,
@@ -31,20 +48,3 @@ posts = Table('posts', metadata,
 #               Column('avatar', postgresql.BYTEA, nullable=True),
 #               Column('time', DateTime, nullable=False)
 #               )
-
-# # СПОСОБ 2
-# # объект для ВСЕХ таблиц базы для наследования классов таблиц -------------------------------------------------------
-# all_db_tables = declarative_base()
-#
-#
-# # описание таблицы для Пользователей
-# class Users(all_db_tables):
-#     __tablename__ = 'users'
-#     __table_args__ = {'extend_existing': True}  # продолжать, если таблица существует
-#     id = Column(Integer(), primary_key=True)
-#     name = Column(String(128), nullable=False)
-#     email = Column(String(128), nullable=False)
-#     psw = Column(String(256), nullable=False)
-#     avatar = Column(LargeBinary(), nullable=True)
-#     time = Column(DateTime, nullable=False)
-#

@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 boot = logging.getLogger('boot')
 
 # создание приложения - объекта FastAPI
-app = FastAPI(lifespan=lifespan, debug=True)
+app = FastAPI(lifespan=lifespan, debug=True)  # todo вынести debug в конфиг
 
 app.middleware('http')(request_duration)  # логирование длительности запроса
 app.middleware('http')(generate_req_id)  # генерация асинх контекстного id запроса
