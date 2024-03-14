@@ -55,7 +55,7 @@ class InjectingReqID(logging.Filter):
         return True
 
 
-def setup_log(logging_level: int, timing_level: int, log_format: str) -> None:
+def setup_log(logging_level: int, log_format: str) -> None:
     """Установка общих параметров логирования"""
 
     # Установка потокового обработчика handler для стандартного вывода stderr
@@ -69,17 +69,12 @@ def setup_log(logging_level: int, timing_level: int, log_format: str) -> None:
     # ВАЖНО! если это вдруг не первая установка конфигурации логирования, то нужно передать keyword force=True
     logging.basicConfig(level=logging_level, handlers=[stdout_handler], force=True)
 
-
-def log_loggers():
-    """Логирование логеров, перечисление их количества"""
     log_logger_var = logging.getLogger("log_logger")
     # получим список всех логеров в системе
     ar = sorted(list(set([logger_name for logger_name in logging.Logger.manager.loggerDict.keys()])))
-    log_logger_var.info(f"{len(ar)} RegPortal-server loggers created")
+    log_logger_var.info(f"{len(ar)} loggers created")
 
-
-def log_file_system():
-    """Логирование файловой системы"""
+    # Логирование файловой системы
     log_cache = logging.getLogger("log_cache")
     os_platform = platform.system()
     if os_platform == "Windows":

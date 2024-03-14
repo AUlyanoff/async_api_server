@@ -1,25 +1,17 @@
-# import logging
-#
-# import psycopg2
-# from sqlalchemy import select
-#
-# from app.app_init import Session
-# from database.tables import users
-#
-# logger = logging.getLogger(__name__)
-#
-#
-def get_users_list():
+import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database.tables import users
+
+logger = logging.getLogger(__name__)
+
+
+async def get_users_list(session: AsyncSession):
     """Получить список зарегистрированных пользователей"""
-    result = None
-#     query = select(users.c.name, users.c.email)
-#     try:
-#         with Session() as session:
-#             result = session.execute(query).mappings().all()
-#     except psycopg2.OperationalError as e:
-#         logger.error(f"\n\tUnsuccessful attempt database reading.\n\t{e}")
-#     except Exception as e:
-#         logger.error(f"\n\tUnexpected database error.\n\t{e}")
+    # result = None
+    result = await session.execute(select(users))
+
     return result
 
 

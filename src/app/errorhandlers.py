@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from asyncpg.exceptions import InternalServerError
 from asyncpg.exceptions._base import PostgresError
 # from database.exceptions import DatabaseException, ResultCheckException
+from sqlalchemy.exc import ProgrammingError
 
 from utils.log.utils import format_flatten_dict, trunc_str
 from utils.consts import db_errs
@@ -14,7 +15,29 @@ from utils.consts import db_errs
 logger = logging.getLogger(__name__)
 
 
-async def pydantic(request: Request, exc: RequestValidationError):
+async def tabel_not_found(request: Request, e: ProgrammingError):
+    """Такой таблицы в базе нет"""
+    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    stat = 575
+    response = PlainTextResponse(content='Unexpected server error', status_code=stat)
+
+    if getattr(e, 'code', None) == 'f405':
+        if getattr(e, 'orig', None):
+            if getattr(e.orig, 'sqlstate') == '42P01':
+                if len(e.orig.args) > 0:
+                    err_msg = e.orig.args[0].split(': ')[-1]
+                    ll += f'\n\t\t\tUnsuccessful attempt database reading.' \
+                          f'\n\t\t\t{err_msg}, sqlalchemy ProgrammingError code = f405, sqlstate = 42P01'
+    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
+    ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
+    ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
+
+    logger.error(ll)
+    return response
+
+
+async def pydantic(request: Request, e: RequestValidationError):
     """Обработчик исключений от Pydantic"""
     """FastApi вызывает Pydantic
        - съедает исключение Pydantic-а ValidationError,
@@ -24,13 +47,13 @@ async def pydantic(request: Request, exc: RequestValidationError):
     ll = f'\n\t<~\t\tPydantic validation error: {request.url.path}, {request.scope["endpoint"].__name__}'
 
     ls = list()
-    if 'pydantic' in str(exc.errors()).lower():
+    if 'pydantic' in str(e.errors()).lower():
         stat = 400
         response = PlainTextResponse(content='Bad request. Wrong body', status_code=stat)
-        for error in exc.errors():
+        for error in e.errors():
             ls.append(f"\t\t\t- {str(error.get('type'))[:16]:<16} "
                       f"{(': ').join(error.get('loc')):<20} = {str(error.get('input')):<12} {error.get('msg')}.")
-    elif 'json_invalid' in str(exc.errors()).lower():
+    elif 'json_invalid' in str(e.errors()).lower():
         stat = 400
         response = PlainTextResponse(content='Bad request. Invalid json', status_code=stat)
     else:
@@ -48,31 +71,31 @@ async def pydantic(request: Request, exc: RequestValidationError):
     return response
 
 
-# async def database_exception_handler(request: Request, exc: DatabaseException):
+# async def database_exception_handler(request: Request, e: DatabaseException):
 #     """Обработчик исключения базы данных"""
 #     response = PlainTextResponse(content='DatabaseError', status_code=500)
 #     ll = f"\n\t<≡\t\t{request.method} {request.url.path} processing request ended, HTTP={response.status_code}"
 #     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))
 #     ll += "\n\tdata\t" + trunc_str(response.body.decode())
-#     sqlstate = getattr(exc.exception, 'sqlstate', None)
-#     detail = getattr(exc.exception, 'detail', None)
+#     sqlstate = getattr(e.exception, 'sqlstate', None)
+#     detail = getattr(e.exception, 'detail', None)
 #
-#     ll += f"\n\t\t\tError executing SP {exc.proc_name}" \
+#     ll += f"\n\t\t\tError executing SP {e.proc_name}" \
 #           f"\n\t\t\t{db_errs.get(sqlstate, 'Unexpected database error')} " \
-#           f"asyncpg: {sqlstate}, {exc.exception.__repr__()}, detail: {detail}"
+#           f"asyncpg: {sqlstate}, {e.exception.__repr__()}, detail: {detail}"
 #
 #     logger.error(ll)
 #
 #     return response
 
 
-async def postgres(request: Request, exc: PostgresError) -> PlainTextResponse:
+async def postgres(request: Request, e: PostgresError) -> PlainTextResponse:
     """Обработчик исключения неверного кода возврата"""
-    if isinstance(exc, InternalServerError):
+    if isinstance(e, InternalServerError):
         pass
     response = PlainTextResponse(content='DatabaseError', status_code=500)
 
-    ll = f'\n\tError checking ResultCode for SP: {exc.proc_name}: rc={exc.rc}, err={exc.err}'
+    ll = f'\n\tError checking ResultCode for SP: {e.proc_name}: rc={e.rc}, err={e.err}'
     ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))    # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())              # тело ответа
