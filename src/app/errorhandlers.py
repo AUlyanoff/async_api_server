@@ -4,15 +4,43 @@ import logging
 from fastapi import Request
 from fastapi.responses import PlainTextResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
-from asyncpg.exceptions import InternalServerError
 from asyncpg.exceptions._base import PostgresError
-# from database.exceptions import DatabaseException, ResultCheckException
 from sqlalchemy.exc import ProgrammingError
+from asyncpg import InternalServerError
+# from database.exceptions import DatabaseException, ResultCheckException
 
+
+from config.db import db_cfg
 from utils.log.utils import format_flatten_dict, trunc_str
-from utils.consts import db_errs
+# from utils.consts import db_errs
 
 logger = logging.getLogger(__name__)
+
+
+async def authentication(request: Request, e: InternalServerError):
+    """То ли юзер, то ли пароль, то ли хост, то ли название базы"""
+    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    stat = 575
+    response = PlainTextResponse(content='Unexpected server error', status_code=stat)
+
+    if getattr(e, 'sqlstate', '') == 'XX000':
+        if 'password authentication failed' in getattr(e, "message", ""):
+            ll += ('Check host, user or password...')
+            # sys.tracebacklimit = 0  # страусов не пугать, пол бетонный
+        elif 'database ' + db_cfg.name + ' does not exist' in getattr(e, "message", "").replace('"', ''):
+            ll += ('Check DB name...')
+            # sys.tracebacklimit = 0
+
+    ll += f'\n\t\t\tUnsuccessful attempt database reading.' \
+          f'\n\t\t\t, sqlalchemy InternalServerError code = f405, sqlstate = XX000'
+
+    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
+    ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
+    ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
+
+    logger.error(ll)
+    return response
 
 
 async def tabel_not_found(request: Request, e: ProgrammingError):
@@ -72,7 +100,7 @@ async def pydantic(request: Request, e: RequestValidationError):
 
 
 # async def database_exception_handler(request: Request, e: DatabaseException):
-#     """Обработчик исключения базы данных"""
+#     """Обработчик исключения базы данных - заготовка для обрывов коннектов во время счёта"""
 #     response = PlainTextResponse(content='DatabaseError', status_code=500)
 #     ll = f"\n\t<≡\t\t{request.method} {request.url.path} processing request ended, HTTP={response.status_code}"
 #     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))
@@ -90,7 +118,7 @@ async def pydantic(request: Request, e: RequestValidationError):
 
 
 async def postgres(request: Request, e: PostgresError) -> PlainTextResponse:
-    """Обработчик исключения неверного кода возврата"""
+    """Обработчик исключения базы данных - заготовка для обрывов коннектов во время счёта"""
     if isinstance(e, InternalServerError):
         pass
     response = PlainTextResponse(content='DatabaseError', status_code=500)

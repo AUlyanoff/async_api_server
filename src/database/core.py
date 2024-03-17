@@ -8,7 +8,7 @@ from sqlalchemy import inspect, insert
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection
 
 from config.db import db_cfg
-from database.init import async_session, async_engine, Base, boot, db_url
+from database.init import async_session, async_engine, boot, db_url
 from database.tables import meta, main_menu, users, posts
 
 logger = logging.getLogger(__name__)
@@ -35,23 +35,8 @@ async def db_closed():
 
 async def db_init():
     """Пытаемся связаться с базой и залогировать параметры успешной попытки"""
-    await upload_demo(force=True)
-
-    def get_table_names(connection):
-        """Читаем список всех таблиц"""
-        inspector = inspect(connection)
-        db_table_names = inspector.get_table_names()
-        return db_table_names
-
-    async def async2sync(sync_func):
-        """ Inspector асинхронно не работает, см. https://docs.sqlalchemy.org/en/20/errors.html#no-inspection-available
-            Поэтому вызываем синхронную сущность из асинхронного коннекта синхронным методом .run_sync
-        """
-        async with async_engine.connect() as conn:
-            result = await conn.run_sync(sync_func)
-        return result
-
     try:
+        await upload_demo(forced=True)
         table_names = await async2sync(get_table_names)
     except InternalServerError as e:
         if e.sqlstate == 'XX000':
@@ -63,7 +48,7 @@ async def db_init():
                 sys.tracebacklimit = 0
         raise
     except TimeoutError as e:
-        boot.info(f'Timeout with DB-connecting, check db_url={db_url} {e}')
+        boot.info(f'Timeout with DB-connecting, may be wrong port? Check db_url={db_url} {e}')
         sys.tracebacklimit = 0
         raise
 
@@ -81,14 +66,30 @@ async def db_init():
     return None
 
 
-async def upload_demo(force=False):
-    """ Заполнение таблиц демо-данными
-        force=True приводит к предварительному уничтожению базы drop all
+def get_table_names(connection):
+    """Читаем список всех таблиц"""
+    inspector = inspect(connection)
+    db_table_names = inspector.get_table_names()
+    return db_table_names
+
+
+async def async2sync(sync_func):
+    """ Inspector асинхронно не работает, см. https://docs.sqlalchemy.org/en/20/errors.html#no-inspection-available
+        Поэтому вызываем синхронную сущность из асинхронного коннекта синхронным методом .run_sync
     """
-    logger.info(f'Upload demo data started, force={force}')
+    async with async_engine.connect() as conn:
+        result = await conn.run_sync(sync_func)
+    return result
+
+
+async def upload_demo(forced=False):
+    """ Заполнение таблиц демо-данными
+        forced=True приводит к предварительному уничтожению базы drop all
+    """
+    logger.info(f'Upload demo data started, forced={forced}')
 
     async with async_engine.begin() as conn:
-        if force:
+        if forced:
             await conn.run_sync(meta.drop_all)          # Убить все таблицы в базе
             logger.info(f'All database tables dropped...')
         await conn.run_sync(meta.create_all)            # Создать все таблицы в базе (пустые)
@@ -139,3 +140,5 @@ async def upload_demo(force=False):
                          'Это неплохой пример, т.к. любое api в конце концов сводится к вычислениями над базой.'},
             ]
         )
+
+

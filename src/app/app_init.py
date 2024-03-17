@@ -8,13 +8,14 @@ from sys import version as python_ver
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import ProgrammingError
+from asyncpg.exceptions import InternalServerError
 from fastapi import FastAPI, __version__ as fast_api_ver
 from fastapi.responses import JSONResponse
 from asyncpg.exceptions._base import PostgresError
 
 from app.api.v1.routes import v1
 from app.api.v2.routes import v2
-from app.errorhandlers import pydantic, postgres, tabel_not_found
+from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication
 from utils.log.req_duration import request_duration
 from utils.log.req_id import generate_req_id
 from utils.log.init import setup_log
@@ -30,8 +31,8 @@ from config.app import cfg
 async def lifespan(application: FastAPI):
     """Пред- и постобработчик запуска FastAPI"""
     # код до yield будет выполнен после создания приложения - объекта FastAPI, но перед его инициализацией
-    await db_init()  # связываемся с базой
     setup_log(cfg.log_int, cfg.log_format)  # инициализация логирования
+    await db_init()  # связываемся с базой
     boot.info("Server loaded successfully")
 
     yield
@@ -52,6 +53,7 @@ app.middleware('http')(generate_req_id)  # генерация асинх кон�
 app.add_exception_handler(RequestValidationError, pydantic)
 app.add_exception_handler(PostgresError, postgres)
 app.add_exception_handler(ProgrammingError, tabel_not_found)
+app.add_exception_handler(InternalServerError, authentication)
 
 # app.include_router(ios_router, tags=['iOS'])  # регистрация роутов iOS
 app.include_router(v1, prefix="/api/v1", tags=["version_1"])  # регистрация роутов Android
