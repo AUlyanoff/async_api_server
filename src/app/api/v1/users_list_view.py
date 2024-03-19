@@ -1,8 +1,8 @@
 import logging
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi import Request, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from database.core import get_session
+from sqlalchemy.ext.asyncio import AsyncConnection
+from database.core import get_conn
 
 
 from app.api.v1.routes import v1
@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 @v1.post("/users/list")
-async def users_list(request: Request, session: AsyncSession = Depends(get_session)):
+async def users_list(request: Request, conn: AsyncConnection = Depends(get_conn)):
     """Возвращает список зарегистрированных юзеров"""
     api_path = request.url.path  # путь вызова API
     logger.debug(f"{api_path} ({users_list.__doc__}) started...")
 
-    table_result = await get_users_list(session)
+    table_result = await get_users_list(conn)
     dict_result = serialize(table_result)
 
     response, status = {"data": dict_result}, 200

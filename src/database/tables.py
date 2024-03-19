@@ -6,7 +6,7 @@ from sqlalchemy.dialects import postgresql
 meta = MetaData()
 
 # Описание таблицы для Главного Меню
-main_menu = Table('main_menu', meta,
+main_menu = Table('mainmenu', meta,
                   Column('id', Integer(), primary_key=True),
                   Column('title', String(64), nullable=False),
                   Column('url', String(256), nullable=False)

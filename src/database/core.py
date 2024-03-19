@@ -5,20 +5,13 @@ import logging
 
 from asyncpg import InternalServerError
 from sqlalchemy import inspect, insert
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection
+from sqlalchemy.ext.asyncio import AsyncConnection
 
 from config.db import db_cfg
-from database.init import async_session, async_engine, boot, db_url
+from database.init import async_engine, boot, db_url
 from database.tables import meta, main_menu, users, posts
 
 logger = logging.getLogger(__name__)
-
-
-# Dependency для эндпойнтов
-async def get_session() -> AsyncSession:
-    """Получение сессии"""
-    async with async_session() as session:
-        yield session   # будет стоять в этой точке до освобождения сессии, после чего контекстный менеджер её закроет
 
 
 # Dependency для эндпойнтов
@@ -84,7 +77,7 @@ async def async2sync(sync_func):
 
 async def upload_demo(forced=False):
     """ Заполнение таблиц демо-данными
-        forced=True приводит к предварительному уничтожению базы drop all
+        forced=True приводит к предварительному уничтожению базы drop_all
     """
     logger.info(f'Upload demo data started, forced={forced}')
 
@@ -141,4 +134,10 @@ async def upload_demo(forced=False):
             ]
         )
 
-
+# # Dependency для эндпойнтов
+# from database.init import async_session
+# from sqlalchemy.ext.asyncio import AsyncSession
+# async def get_session() -> AsyncSession:
+#     """Получение сессии"""
+#     async with async_session() as session:
+#         yield session   # будет стоять в этой точке до освобождения сессии, после чего контекстный менеджер её закроет

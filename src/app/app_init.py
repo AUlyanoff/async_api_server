@@ -26,7 +26,6 @@ from app.app_ver import app_ver
 from config.app import cfg
 
 
-# noinspection PyUnusedLocal
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     """Пред- и постобработчик запуска FastAPI"""
