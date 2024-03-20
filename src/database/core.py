@@ -8,7 +8,7 @@ from sqlalchemy import inspect, insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from config.db import db_cfg
-from database.init import async_engine, boot, db_url
+from database.db_init import async_engine, boot, db_url
 from database.tables import meta, main_menu, users, posts
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ async def db_init():
         password=len(_dict['password']) * '*',
         driver=async_engine.driver,
         dialect=async_engine.dialect.name,
-        total_tables_found=f'{len(table_names)} ({", ".join(table_names[:5])}...)'
+        total_tables_found=f'{len(table_names)} ({", ".join(table_names[:5])}...)',
     )
     boot.info(f'Database initialized successfully: ' + ''.join([f'\n\t{k:<16} \t= {v}' for k, v in _dict.items()]))
 

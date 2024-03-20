@@ -4,8 +4,9 @@ db:     # удалённая база Ульянова
   host: ep-snowy-limit-67291163-pooler.eu-central-1.aws.neon.tech
   port: 5432
   user: AUlyanoff
-#  password: qRjCuQhx87Nb
   password: me5zLZGsNV8i
+  pool_size: 5
+  pool_overflow: 40
 #  #"Эта база лежит на бесплатном сервисе размещения PostgreSQL где-то у американцев на Neon
 #  #https://console.neon.tech/app/projects/long-voice-42808384
 #  #авторизация через gitHub - то есть идешь на Neon, но авторизуешься своим gitHub (в это время ты должен быть авторизован)

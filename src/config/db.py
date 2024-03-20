@@ -5,7 +5,7 @@ import yaml
 
 from pydantic import BaseModel, Field, PositiveInt, IPvAnyAddress, ConfigDict, FilePath, StrictStr, AnyUrl, SecretStr, \
     ValidationError
-from typing import Literal, Union
+from typing import Literal, Union, Optional
 from typing_extensions import Annotated
 
 from utils.paths import BASE_PATH
@@ -28,8 +28,8 @@ class DBconfig(BaseModel):
 
     # необязательные параметры, могут отсутствовать в конфиге, и тогда примут значения по умолчанию, как здесь указано
     type: Literal['postgresql', 'PostgreSQL', 'Mock', 'mock'] = 'postgresql'  # перечень возможных значений
-    minconn: Annotated[int, Field(ge=1, le=1999)] = 5       # натуральное число с ограничением сверху
-    maxconn: Annotated[int, Field(ge=2, le=2000)] = 40
+    pool_size: Annotated[int, Field(ge=1, le=1999)] = 16
+    pool_overflow: Annotated[int, Field(ge=0, le=1999)] = 8
     sslmode: Literal['disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'] = 'disable'
     sslrootcert: FilePath = ''                              # путь существует и является файлом
     sslcert: FilePath = ''

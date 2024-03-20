@@ -17,16 +17,16 @@ from utils.log.utils import format_flatten_dict, trunc_str
 logger = logging.getLogger(__name__)
 
 
-async def interface_err(request: Request, e: InterfaceError):
+async def interface_err(req: Request, e: InterfaceError):
     """Коннект с базой оборвался ?"""
-    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    ll = f'\n\t<~\t\t{getattr(type(e), "__name__", "Error")} handler: {req.url.path}, {req.scope["endpoint"].__name__}'
     stat = 575
     response = PlainTextResponse(content='Unexpected server error', status_code=stat)
 
-    ll += f'\n\t\t\tUnsuccessful attempt database reading.'
-          # f'\n\t\t\t, sqlalchemy InternalServerError code = f405, sqlstate = XX000'
-
-    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += f'\n\t\t\tUnsuccessful attempt database reading. '
+    if hasattr(e, 'code') and hasattr(e, 'orig'):
+        ll += f'{getattr(type(e), "__name__", "Error")} {e.code}, {e.orig.args[0].split(">: ")[-1]}'
+    ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing req HTTP={stat} ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
     ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
@@ -35,9 +35,9 @@ async def interface_err(request: Request, e: InterfaceError):
     return response
 
 
-async def authentication(request: Request, e: InternalServerError):
+async def authentication(req: Request, e: InternalServerError):
     """То ли юзер, то ли пароль, то ли хост, то ли название базы"""
-    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    ll = f'\n\t<~\t\tProgrammingError handler: {req.url.path}, {req.scope["endpoint"].__name__}'
     stat = 575
     response = PlainTextResponse(content='Unexpected server error', status_code=stat)
 
@@ -52,7 +52,7 @@ async def authentication(request: Request, e: InternalServerError):
     ll += f'\n\t\t\tUnsuccessful attempt database reading.' \
           f'\n\t\t\t, sqlalchemy InternalServerError code = f405, sqlstate = XX000'
 
-    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing request HTTP={stat} ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
     ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
@@ -61,9 +61,9 @@ async def authentication(request: Request, e: InternalServerError):
     return response
 
 
-async def tabel_not_found(request: Request, e: ProgrammingError):
+async def tabel_not_found(req: Request, e: ProgrammingError):
     """Такой таблицы в базе нет"""
-    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    ll = f'\n\t<~\t\tProgrammingError handler: {req.url.path}, {req.scope["endpoint"].__name__}'
     stat = 575
     response = PlainTextResponse(content='Unexpected server error', status_code=stat)
 
@@ -74,7 +74,7 @@ async def tabel_not_found(request: Request, e: ProgrammingError):
                     err_msg = e.orig.args[0].split(': ')[-1]
                     ll += f'\n\t\t\tUnsuccessful attempt database reading.' \
                           f'\n\t\t\t{err_msg}, sqlalchemy ProgrammingError code = f405, sqlstate = 42P01'
-    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing request HTTP={stat} ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
     ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
@@ -83,14 +83,14 @@ async def tabel_not_found(request: Request, e: ProgrammingError):
     return response
 
 
-async def pydantic(request: Request, e: RequestValidationError):
+async def pydantic(req: Request, e: RequestValidationError):
     """Обработчик исключений от Pydantic"""
     """FastApi вызывает Pydantic
        - съедает исключение Pydantic-а ValidationError,
        - добавляет свои обработки и
        - перевозбуждает исключение под именем RequestValidationError
     """
-    ll = f'\n\t<~\t\tPydantic validation error: {request.url.path}, {request.scope["endpoint"].__name__}'
+    ll = f'\n\t<~\t\tPydantic validation error: {req.url.path}, {req.scope["endpoint"].__name__}'
 
     ls = list()
     if 'pydantic' in str(e.errors()).lower():
@@ -108,7 +108,7 @@ async def pydantic(request: Request, e: RequestValidationError):
         response = PlainTextResponse(content='Unexpected RequestValidationError', status_code=stat)
 
     ll += '\n'.join(ls)
-    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing request HTTP={stat} ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
 
@@ -117,10 +117,10 @@ async def pydantic(request: Request, e: RequestValidationError):
     return response
 
 
-# async def database_exception_handler(request: Request, e: DatabaseException):
+# async def database_exception_handler(req: Request, e: DatabaseException):
 #     """Обработчик исключения базы данных - заготовка для обрывов коннектов во время счёта"""
 #     response = PlainTextResponse(content='DatabaseError', status_code=500)
-#     ll = f"\n\t<≡\t\t{request.method} {request.url.path} processing request ended, HTTP={response.status_code}"
+#     ll = f"\n\t<≡\t\t{req.method} {req.url.path} processing request ended, HTTP={response.status_code}"
 #     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))
 #     ll += "\n\tdata\t" + trunc_str(response.body.decode())
 #     sqlstate = getattr(e.exception, 'sqlstate', None)
@@ -135,14 +135,14 @@ async def pydantic(request: Request, e: RequestValidationError):
 #     return response
 
 
-async def postgres(request: Request, e: PostgresError) -> PlainTextResponse:
+async def postgres(req: Request, e: PostgresError) -> PlainTextResponse:
     """Обработчик исключения базы данных - заготовка для обрывов коннектов во время счёта"""
     if isinstance(e, InternalServerError):
         pass
     response = PlainTextResponse(content='DatabaseError', status_code=500)
 
     ll = f'\n\tError checking ResultCode for SP: {e.proc_name}: rc={e.rc}, err={e.err}'
-    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request ended"
+    ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing request ended"
     ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))    # заголовки ответа
     ll += "\n\tdata\t" + trunc_str(response.body.decode())              # тело ответа
 

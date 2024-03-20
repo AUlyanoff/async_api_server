@@ -10,16 +10,7 @@ logger = logging.getLogger(__name__)
 
 async def get_users_list(conn: AsyncConnection):
     """Получить список зарегистрированных пользователей"""
-    result = None
-    try:
-        result = await conn.execute(select(users))
-    except InterfaceError as e:
-        logger.error(f'\nInterfaceError {e.code}, {e.orig.args[0].split(">: ")[-1]}\n{70 * "="}\n{e}')
-        raise
-    except Exception as e:
-        logger.error(f'\n{80*"-"}\n{e}')  # e.code == 'rvf5', e.orig.args[0].split('>: ')[-1] == 'connection is closed'
-        raise
-
+    result = await conn.execute(select(users))
     return result.fetchall()
 
 

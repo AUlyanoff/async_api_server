@@ -3,7 +3,6 @@ import logging
 
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base
 
 from config.db import db_cfg
 
@@ -17,6 +16,9 @@ db_url = URL.create('postgresql+asyncpg',
                     host=db_cfg.host,
                     port=db_cfg.port,
                     )
-
-async_engine = create_async_engine(db_url, echo=False)
+async_engine = create_async_engine(db_url,                              # куда и к кому подключаться
+                                   echo=False,                          # логировать команды SQL
+                                   pool_size=db_cfg.pool_size,          # размер пула соединений
+                                   max_overflow=db_cfg.pool_overflow,   # на сколько можно превысить размер пула
+                                   )
 async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
