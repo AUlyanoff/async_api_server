@@ -4,7 +4,7 @@ import time
 
 from starlette.requests import Request
 
-from config.app import cfg
+from config.app_cfg import cfg
 
 logger = logging.getLogger()
 

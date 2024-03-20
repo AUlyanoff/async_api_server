@@ -23,7 +23,7 @@ from asyncpg import __version__ as asyncpg_ver
 from database.core import db_init, db_closed
 
 from app.app_ver import app_ver
-from config.app import cfg
+from config.app_cfg import cfg
 
 
 @asynccontextmanager
@@ -31,7 +31,7 @@ async def lifespan(application: FastAPI):
     """Пред- и постобработчик запуска FastAPI"""
     setup_log(cfg.log_int, cfg.log_format)      # инициализация логирования
     await db_init()                             # связываемся с базой
-    boot.info("Server loaded successfully")
+    boot.info("Server loaded successfully, waiting request...")
 
     # код до yield будет выполнен после создания объекта FastAPI, но перед его инициализацией
     yield

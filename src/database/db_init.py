@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
-from config.db import db_cfg
+from config.db_cfg import db_cfg
 
 boot = logging.getLogger('boot')
 boot.info('Database initialization started')

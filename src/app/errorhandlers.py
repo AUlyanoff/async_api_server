@@ -10,7 +10,7 @@ from asyncpg import InternalServerError
 # from database.exceptions import DatabaseException, ResultCheckException
 
 
-from config.db import db_cfg
+from config.db_cfg import db_cfg
 from utils.log.utils import format_flatten_dict, trunc_str
 # from utils.consts import db_errs
 
