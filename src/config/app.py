@@ -35,6 +35,7 @@ class APPconfig(BaseModel):
     log: LogTypes = 'DEBUG'
     timing: LogTypes = 'CRITICAL'
     log_format: StrictStr = '%(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
+    debug: bool = False     # запускать ли FastAPI в режиме debug
     uvicorn: Uvicorn = Uvicorn()                       # параметр конфига uvicorn - это словарь
 
     # ============================== Вычисляемые параметры конфига приложений ==========================

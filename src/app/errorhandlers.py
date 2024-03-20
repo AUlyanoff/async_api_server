@@ -5,7 +5,7 @@ from fastapi import Request
 from fastapi.responses import PlainTextResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from asyncpg.exceptions._base import PostgresError
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, InterfaceError
 from asyncpg import InternalServerError
 # from database.exceptions import DatabaseException, ResultCheckException
 
@@ -15,6 +15,24 @@ from utils.log.utils import format_flatten_dict, trunc_str
 # from utils.consts import db_errs
 
 logger = logging.getLogger(__name__)
+
+
+async def interface_err(request: Request, e: InterfaceError):
+    """Коннект с базой оборвался ?"""
+    ll = f'\n\t<~\t\tProgrammingError handler: {request.url.path}, {request.scope["endpoint"].__name__}'
+    stat = 575
+    response = PlainTextResponse(content='Unexpected server error', status_code=stat)
+
+    ll += f'\n\t\t\tUnsuccessful attempt database reading.'
+          # f'\n\t\t\t, sqlalchemy InternalServerError code = f405, sqlstate = XX000'
+
+    ll += f"\n\t<≡\t\t{request.method} {request.url.path} processing request HTTP={stat} ended"
+    ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
+    ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
+    ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
+
+    logger.error(ll)
+    return response
 
 
 async def authentication(request: Request, e: InternalServerError):

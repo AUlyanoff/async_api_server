@@ -10,6 +10,7 @@ ctx_req_id = ContextVar('req_id')
 logger = logging.getLogger()
 
 
+# Middleware
 async def generate_req_id(request: Request, call_next):
     """Генерация уникального номера запроса. Номер храним в контексте корутины.
     Используем позже, при логировании, для идентификации нисходящих вызовов (какому запросу они принадлежат).

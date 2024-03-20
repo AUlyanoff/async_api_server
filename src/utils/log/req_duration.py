@@ -9,6 +9,7 @@ from config.app import cfg
 logger = logging.getLogger()
 
 
+# Middleware
 async def request_duration(request: Request, call_next):
     """Подсчитать и залогировать длительность выполнения запроса (если надо)"""
     if logging.root.getEffectiveLevel() >= cfg.timing_int:

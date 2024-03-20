@@ -21,7 +21,7 @@ async def users_list(request: Request, conn: AsyncConnection = Depends(get_conn)
     dict_result = serialize(table_result)
 
     response, status = {"data": dict_result}, 200
-    _ll = f"{api_path}, HTTP={status} ended\n\tresponse={response}"
-    logger.info(_ll) if status == 200 else logger.error(_ll)
+    ll = f"{api_path}, HTTP={status} ended\n\tresponse={response}"
+    logger.info(ll) if status == 200 else logger.error(ll)
 
     return JSONResponse(response, status_code=status)
