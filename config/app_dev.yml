@@ -2,7 +2,7 @@ app:
 
   log: d            # допустимые уровни логирования DEBUG, INFO, WARNING, ERROR, FATAL
   timing: f         # при достижении параметром log этого уровня становятся видным время исполнения запросов
-  log_format: '%(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
+#  log_format: '%(asctime)s %(levelname).1s: %(req_id)s: %(filename)s/%(funcName)s(%(lineno)s): %(message)s'
   debug: True
 
   uvicorn:

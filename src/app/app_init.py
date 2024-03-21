@@ -10,7 +10,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import ProgrammingError, InterfaceError
 from asyncpg.exceptions import InternalServerError
 from fastapi import FastAPI, __version__ as fast_api_ver
-from fastapi.responses import JSONResponse
 from asyncpg.exceptions._base import PostgresError
 
 from app.api.v1.routes import v1
@@ -29,8 +28,8 @@ from config.app_cfg import cfg
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     """Пред- и постобработчик запуска FastAPI"""
-    setup_log(cfg.log_int, cfg.log_format)      # инициализация логирования
-    await db_init()                             # связываемся с базой
+    await db_init()                                 # связываемся с базой
+    setup_log(cfg.log_int, cfg.log_format)          # инициализация логирования
     boot.info("Server loaded successfully, waiting request...")
 
     # код до yield будет выполнен после создания объекта FastAPI, но перед его инициализацией

@@ -17,8 +17,10 @@ db_url = URL.create('postgresql+asyncpg',
                     port=db_cfg.port,
                     )
 async_engine = create_async_engine(db_url,                              # куда и к кому подключаться
-                                   echo=False,                          # логировать команды SQL
+                                   # echo=True,                          # логировать команды SQL
                                    pool_size=db_cfg.pool_size,          # размер пула соединений
                                    max_overflow=db_cfg.pool_overflow,   # на сколько можно превысить размер пула
+                                   echo_pool=True,                      # логировать ведение пула
+                                   hide_parameters=True,                # подавление вывода параметров SQL
                                    )
 async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)

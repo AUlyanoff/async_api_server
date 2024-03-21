@@ -3,7 +3,7 @@ from multiprocessing import freeze_support
 import logging
 boot = logging.getLogger("boot")  # логер для вывода загрузочной информации
 handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname).1s: %(message)s', "%Y-%m-%d %H:%M:%S"))
+handler.setFormatter(logging.Formatter('%(levelname).1s: %(message)s', "%Y-%m-%d %H:%M:%S"))
 boot.propagate = False  # запрет наследования от родителя, поэтому формат и уровень логера не будут меняться
 boot.addHandler(handler)
 boot.setLevel(logging.INFO)

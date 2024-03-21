@@ -3,7 +3,6 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy import select
 from database.tables import users
-from sqlalchemy.exc import InterfaceError
 
 logger = logging.getLogger(__name__)
 

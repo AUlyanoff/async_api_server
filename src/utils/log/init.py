@@ -4,44 +4,26 @@ import sys
 import platform
 
 from utils.log.req_id import ctx_req_id
-from utils.consts import logging_levels
+from utils.consts import color
 
-logger = logging.getLogger("log_logger")
+# logger = logging.getLogger("log_logger")
 
 
 class CustomFormatter(logging.Formatter):
-    """Logging colored formatter, coloring only the first letter of each log message."""
-
-    grey = '\x1b[38;21m'
-    blue = '\x1b[38;5;39m'
-    yellow = '\x1b[38;5;226m'
-    red = '\x1b[31m'
-    reset = '\x1b[0m'
-
-    def __init__(self, fmt, datefmt):
-        super().__init__(fmt, datefmt)
+    """Модифицирует поведение стандартного форматтера, от которого и наследуется"""
 
     def format(self, record):
-        """Форматирует строку логирования"""
+        """Красит букву уровня логирования и удаляет переносы строк в логировании Алхимии"""
+
+        if 'sqlalchemy.engine' in record.name:
+            record.msg = record.msg.replace('\n', '').replace('\t', ' ').replace('\r', '')
+
         formatted_record = super().format(record)  # стандартный формат
-        colored_record = self._colorize_first_letter(formatted_record, record.levelno)  # красит первую букву
+        pos = 20 if 0 < self._fmt.find('asctime') < 5 else 0  # включено или отключено логирование времени
+        painted_letter = color[record.levelno] + formatted_record[pos] + color[0]
+        painted_record = formatted_record[:pos] + painted_letter + formatted_record[pos + 1:]
 
-        return colored_record
-
-    def _colorize_first_letter(self, formatted_record, level):
-        """Красит в цвет первую букву строки логирования"""
-        color_mapping = {
-            logging.DEBUG: self.grey,
-            logging.INFO: self.grey,
-            logging.WARNING: self.blue,
-            logging.ERROR: self.red,
-            logging.CRITICAL: self.red
-        }
-        color_code = color_mapping.get(level, '')
-        pos = 20 if 0 < self._fmt.find('asctime') < 5 else 0    # включено или отключено логирование времени
-        colored_first_letter = color_code + formatted_record[pos] + self.reset
-        colored_record = formatted_record[:pos] + colored_first_letter + formatted_record[pos+1:]
-        return colored_record
+        return painted_record
 
 
 class InjectingReqID(logging.Filter):
@@ -57,6 +39,7 @@ class InjectingReqID(logging.Filter):
 
 def setup_log(logging_level: int, log_format: str) -> None:
     """Установка общих параметров логирования"""
+    boot = logging.getLogger("boot")
 
     # Установка потокового обработчика handler для стандартного вывода stderr
     stdout_handler = logging.StreamHandler(sys.stderr)
@@ -69,15 +52,17 @@ def setup_log(logging_level: int, log_format: str) -> None:
     # ВАЖНО! если это вдруг не первая установка конфигурации логирования, то нужно передать keyword force=True
     logging.basicConfig(level=logging_level, handlers=[stdout_handler], force=True)
 
-    log_logger_var = logging.getLogger("log_logger")
     # получим список всех логеров в системе
     ar = sorted(list(set([logger_name for logger_name in logging.Logger.manager.loggerDict.keys()])))
-    log_logger_var.info(f"{len(ar)} loggers created")
+    boot.info(f"{len(ar)} loggers created")
 
     # Логирование файловой системы
-    log_cache = logging.getLogger("log_cache")
     os_platform = platform.system()
     if os_platform == "Windows":
-        log_cache.debug(f"OS {os_platform}, fcntl_win used (files descriptor control system)")
+        boot.info(f"OS {os_platform}, fcntl_win used (files descriptor control system)")
     else:
-        log_cache.debug(f"OS {os_platform}, fcntl used (files descriptor control system)")
+        boot.info(f"OS {os_platform}, fcntl used (files descriptor control system)")
+
+    # пространство имён логирования Алхимииб установим для Алхимии тот же уровень, что и приложению
+    logging.getLogger('sqlalchemy.engine').setLevel(logging_level)
+    logging.getLogger('sqlalchemy.pool').setLevel(logging_level)

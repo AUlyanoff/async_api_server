@@ -3,20 +3,20 @@ from logging import DEBUG, INFO, WARNING, ERROR, FATAL
 
 # численные значения уровней логирования, устанавливает синонимы
 logging_levels = {
-    "DEBUG": DEBUG,         # 10
-    "D": DEBUG,             # 10
-    "T": DEBUG,             # 10
-    "INFO": INFO,           # 20
-    "I": INFO,              # 20
-    "WARNING": WARNING,     # 30
-    "WARN": WARNING,        # 30
-    "W": WARNING,           # 30
-    "ERROR": ERROR,         # 40
-    "E": ERROR,             # 40
-    "FATAL": FATAL,         # 50
-    "F": FATAL,             # 50
-    "CRITICAL": FATAL,      # 50
-    "C": FATAL,             # 50
+    "DEBUG": DEBUG,  # 10
+    "D": DEBUG,  # 10
+    "T": DEBUG,  # 10
+    "INFO": INFO,  # 20
+    "I": INFO,  # 20
+    "WARNING": WARNING,  # 30
+    "WARN": WARNING,  # 30
+    "W": WARNING,  # 30
+    "ERROR": ERROR,  # 40
+    "E": ERROR,  # 40
+    "FATAL": FATAL,  # 50
+    "F": FATAL,  # 50
+    "CRITICAL": FATAL,  # 50
+    "C": FATAL,  # 50
 }
 
 db_errs = {
@@ -36,4 +36,13 @@ db_errs = {
     '53200': "Insufficient Resources. Out of memory.",
     '53300': "Insufficient Resources. Too many connection.",
     '53400': "Insufficient Resources. Configuration limit exceeded."
+}
+
+color = {
+    0: '\x1b[0m',               # сброс цвета к системному
+    DEBUG: '\x1b[38;21m',       # серый
+    INFO: '\x1b[38;21m',        # серый
+    WARNING: '\x1b[38;5;39m',   # голубой
+    ERROR: '\x1b[31m',          # красный
+    FATAL: '\x1b[31m'           # красный
 }
