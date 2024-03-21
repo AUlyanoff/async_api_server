@@ -7,8 +7,8 @@ from asyncpg import InternalServerError
 from sqlalchemy import inspect, insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from config.db_cfg import db_cfg
-from config.app_cfg import cfg
+from config.db_mdl import db_cfg
+from config.app_mdl import cfg
 from database.db_init import async_engine, boot, db_url
 from database.tables import meta, main_menu, users, posts
 

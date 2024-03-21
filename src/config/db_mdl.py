@@ -5,10 +5,10 @@ import yaml
 
 from pydantic import BaseModel, Field, PositiveInt, IPvAnyAddress, ConfigDict, FilePath, StrictStr, AnyUrl, SecretStr, \
     ValidationError
-from typing import Literal, Union, Optional
+from typing import Literal, Union
 from typing_extensions import Annotated
 
-from utils.paths import BASE_PATH
+from services.paths import BASE_PATH
 
 logger = logging.getLogger('boot')
 

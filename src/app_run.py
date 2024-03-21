@@ -19,7 +19,7 @@ if __name__ == "__main__":
                   f"{datetime.now().strftime('%d-%m-%Y %H:%M:%S, %A')}...",
                   category=UserWarning, filename='', lineno=-1)
 
-    from config.app_cfg import cfg
+    from config.app_mdl import cfg
     uvi = cfg.uvicorn
 
     uvicorn.run("app.app_init:app", host=uvi.host, port=uvi.port, log_level=uvi.log, workers=uvi.workers)

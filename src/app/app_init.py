@@ -6,7 +6,6 @@ from os import path, environ
 from sys import version as python_ver
 
 from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import ProgrammingError, InterfaceError
 from asyncpg.exceptions import InternalServerError
 from fastapi import FastAPI, __version__ as fast_api_ver
@@ -14,15 +13,15 @@ from asyncpg.exceptions._base import PostgresError
 
 from app.api.v1.routes import v1
 from app.api.v2.routes import v2
-from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication, interface_err
-from utils.log.req_duration import request_duration
-from utils.log.req_id import generate_req_id
-from utils.log.init import setup_log
+from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication, interface_err, all_err
+from services.req_duration import request_duration
+from services.req_id import generate_req_id
+from services.log_init import setup_log
 from asyncpg import __version__ as asyncpg_ver
 from database.core import db_init, db_closed
 
 from app.app_ver import app_ver
-from config.app_cfg import cfg
+from config.app_mdl import cfg
 
 
 @asynccontextmanager
@@ -37,7 +36,7 @@ async def lifespan(application: FastAPI):
     # код после yield будет выполнен, когда FastAPI будет остановлен (когда запросы больше обрабатываться не будут)
 
     await db_closed()
-    boot.info("Server finished")
+    boot.info("... server finished")
 # ----------------------------------------- начало загрузки сервиса ---------------------------------------------------
 logger = logging.getLogger(__name__)
 boot = logging.getLogger('boot')
@@ -45,10 +44,8 @@ boot = logging.getLogger('boot')
 # создание нашего приложения - объекта FastAPI
 app = FastAPI(lifespan=lifespan, debug=cfg.debug)
 
-app.middleware('http')(request_duration)  # логирование длительности запроса
-app.middleware('http')(generate_req_id)  # генерация асинх контекстного id запроса
-
 # noinspection PydanticTypeChecker
+app.add_exception_handler(Exception, all_err)
 app.add_exception_handler(RequestValidationError, pydantic)
 app.add_exception_handler(PostgresError, postgres)
 app.add_exception_handler(ProgrammingError, tabel_not_found)
@@ -59,7 +56,8 @@ app.add_exception_handler(InterfaceError, interface_err)
 app.include_router(v1, prefix="/api/v1", tags=["version_1"])  # регистрация роутов Android
 app.include_router(v2, prefix="/api/v2", tags=["version_2"])  # регистрация роутов Android
 
-
+app.middleware('http')(request_duration)  # логирование длительности запроса
+app.middleware('http')(generate_req_id)  # генерация асинхронного контекстного id запроса
 # --------------------------------------------- логирование итогов загрузки -------------------------------------------
 v1_routes = v1.routes.__len__()
 v2_routes = v2.routes.__len__()
