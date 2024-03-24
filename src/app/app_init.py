@@ -16,7 +16,7 @@ from app.api.v2.routes import v2
 from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication, interface_err, all_err
 from serv.req_duration import request_duration
 from serv.req_id import generate_req_id
-from serv.log_req_all import log_all_req
+from serv.log_req_res import log_all_req
 from serv.log_init import setup_log
 from asyncpg import __version__ as asyncpg_ver
 from database.core import db_init, db_closed

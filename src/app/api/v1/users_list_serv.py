@@ -3,6 +3,7 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy import select
 from database.tables import users
+from pydantic import BaseModel, PositiveInt
 
 logger = logging.getLogger(__name__)
 
@@ -24,3 +25,11 @@ def serialize(table):
             if row_dict.get('time'): row_dict['time'] = row_dict.get('time').isoformat()[:-3]+'Z'
             list_dicts.append(row_dict)
     return list_dicts
+
+
+class filterFields(BaseModel):
+    uid: str
+    title: str
+    versionName: str
+    versionCode: PositiveInt
+    enabled: bool

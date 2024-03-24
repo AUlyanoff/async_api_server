@@ -15,6 +15,7 @@ from fastapi.exception_handlers import http_exception_handler
 
 from config.db_mdl import db_cfg
 from serv.log_utils import format_flatten_dict, trunc_str
+from sqlalchemy.exc import DBAPIError
 
 logger = logging.getLogger(__name__)
 
@@ -24,19 +25,29 @@ logger = logging.getLogger(__name__)
 
 async def all_err(req: Request, e: Exception):
     """Универсальный обработчик исключений"""
-    """ВНИМАНИЕ. Если FastAPI.debug == True, то перехват Exception подавляется и управление из FastAPI сюда не попадает.
+    """ВНИМАНИЕ 
+       Если FastAPI.debug == True, то перехват Exception подавляется и управление из FastAPI сюда не попадает
     """
-    ll = f'\n\t<~\t\t{all_err.__doc__} handler ({getattr(type(e), "__name__", "Exception")}): ' \
+    ll = f'\n\t<~\t\t{all_err.__doc__} ({getattr(type(e), "__name__", "Exception")}): ' \
          f'{req.url.path}, {req.scope["endpoint"].__name__}'
 
     content, stat = 'Unexpected server error', 575
     if isinstance(e, HTTPException):
         print(e)
-
+    elif isinstance(e, DBAPIError):
+        response = PlainTextResponse(content=content, status_code=stat)
+        ll += f'\n\t\t\tUnsuccessful attempt database reading. '
+        if hasattr(e, 'code') and hasattr(e, 'orig'):
+            ll += f'{getattr(type(e), "__name__", "Error")} {e.code}, {e.orig.args[0].split(">: ")[-1]}'
+        ll += f"\n\t<≡\t\t{req.method} {req.url.path} processing req HTTP={stat} ended"
+        ll += "\n\thead\t" + format_flatten_dict(dict(response.headers))  # заголовки ответа
+        ll += "\n\tdata\t" + trunc_str(response.body.decode())  # тело ответа
+        ll += "\n\terror\t" + trunc_str(e)  # оригинал ошибки
     else:                                                   # наша обработка не предусмотрена
         ll += f'\n\t<~\t\t{all_err.__doc__} handler ({getattr(type(e), "__name__", "Exception")}): ' \
               f'there is no special handling for this exception, return to system...'
         logger.debug(ll)
+
         if isinstance(e, HTTPException):
             return await http_exception_handler(req, e)     # вернём в FastAPI, пусть обрабатывает как его учили
         else:

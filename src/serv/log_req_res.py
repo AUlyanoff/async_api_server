@@ -22,7 +22,7 @@ async def log_all_req(req: Request, call_next):
 
     if logger.getEffectiveLevel() <= logging.INFO:    # только для INFO и DEBUG
         with suppress(Exception):
-            ll = f"\n\t≡>\t\t{req.method} {req.url} processing request started..."
+            ll = f"\n\n\t≡>\t\t{req.method} {req.url} processing request started..."
             ll += f"\n\thead\t{format_flatten_dict(dict(req.headers))}"
 
             body = await req.body()
@@ -36,7 +36,7 @@ async def log_all_req(req: Request, call_next):
 
     resp = await call_next(req)
 
-    if resp.headers.get('x-frame-options') is None:     # log_resp ещё не получал управления
-        await log_resp(req, resp)     # логирование ответа
+    # if resp.headers.get('x-frame-options') is None:     # log_resp ещё не получал управления
+    await log_resp(req, resp)     # логирование ответа
 
     return resp

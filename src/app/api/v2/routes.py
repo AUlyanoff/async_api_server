@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 from fastapi import APIRouter
-from serv.log_req_fastapi import LogReqRes
+from serv.endpoint_monitor import EPMonitor
 
-v2 = APIRouter(route_class=LogReqRes)     # класс LogReqRes добавляет логирование запроса и ответа
+v2 = APIRouter(route_class=EPMonitor)  # класс EPMonitor наблюдает за окончанием ендпойнта, это пред и пост обработка
