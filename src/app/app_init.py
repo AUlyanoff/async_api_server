@@ -14,9 +14,10 @@ from asyncpg.exceptions._base import PostgresError
 from app.api.v1.routes import v1
 from app.api.v2.routes import v2
 from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication, interface_err, all_err
-from services.req_duration import request_duration
-from services.req_id import generate_req_id
-from services.log_init import setup_log
+from serv.req_duration import request_duration
+from serv.req_id import generate_req_id
+from serv.log_req_all import log_all_req
+from serv.log_init import setup_log
 from asyncpg import __version__ as asyncpg_ver
 from database.core import db_init, db_closed
 
@@ -58,6 +59,7 @@ app.include_router(v2, prefix="/api/v2", tags=["version_2"])  # регистра
 
 app.middleware('http')(request_duration)  # логирование длительности запроса
 app.middleware('http')(generate_req_id)  # генерация асинхронного контекстного id запроса
+app.middleware('http')(log_all_req)  # логирование запросов, не попавших в FastAPI
 # --------------------------------------------- логирование итогов загрузки -------------------------------------------
 v1_routes = v1.routes.__len__()
 v2_routes = v2.routes.__len__()

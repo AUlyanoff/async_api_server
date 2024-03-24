@@ -10,11 +10,11 @@ from asyncpg import InternalServerError
 # from database.exceptions import DatabaseException, ResultCheckException
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
-# from services.consts import db_errs
+# from serv.consts import db_errs
 
 
 from config.db_mdl import db_cfg
-from services.log_utils import format_flatten_dict, trunc_str
+from serv.log_utils import format_flatten_dict, trunc_str
 
 logger = logging.getLogger(__name__)
 

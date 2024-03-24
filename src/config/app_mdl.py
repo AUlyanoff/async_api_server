@@ -6,8 +6,8 @@ import yaml
 from pydantic import BaseModel, ConfigDict, StrictStr, ValidationError, computed_field
 from typing import Literal, ClassVar
 
-from services.paths import BASE_PATH
-from services.consts import logging_levels
+from serv.paths import BASE_PATH
+from serv.consts import logging_levels
 
 logger = logging.getLogger('boot')
 

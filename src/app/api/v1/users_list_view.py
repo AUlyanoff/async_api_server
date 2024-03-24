@@ -7,7 +7,7 @@ from database.core import get_conn
 
 from app.api.v1.routes import v1
 from app.api.v1.users_list_serv import get_users_list, serialize
-from services.log_utils import trunc_str
+from serv.log_utils import trunc_str
 
 logger = logging.getLogger(__name__)
 

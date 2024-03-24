@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 import plistlib
 import re
+from contextlib import suppress
 from copy import deepcopy
 from pprint import pformat
 from textwrap import wrap  # разрезает строку на части с переносом целых слов, и складывает эти части в список
@@ -8,6 +10,12 @@ from typing import Union, Any
 
 # import cchardet as chardet  # пытается определить кодировку заранее неизвестной последовательности байт
 from collections.abc import Iterable
+
+from starlette.concurrency import iterate_in_threadpool
+from starlette.requests import Request
+from starlette.responses import Response
+
+logger = logging.getLogger(__name__)
 
 
 def format_flatten_dict(d: dict, len_str: int = 170, delimiter='\n\t\t\t'):
@@ -127,3 +135,25 @@ def to_debug_message(message: Any):
     # s = re.sub(r"\s+", " ", str(message.decode('utf8')))
     s = re.sub(r"\s+", " ", str(message.decode('unicode-escape')))
     return s
+
+
+async def log_resp(req: Request, resp: Response):
+    """Логирование ответа"""
+    resp.headers['X-Frame-Options'] = 'DENY'  # запрет на отображение во фреймах [#22896]
+
+    # with suppress(Exception):
+    ll = f"\n\t<≡\t\t{req.method} {req.url.path} processing request HTTP={resp.status_code} ended"
+    ll += "\n\thead\t" + format_flatten_dict(dict(resp.headers))  # заголовки ответа
+
+    if hasattr(resp, 'body'):   # есть body, который сделал эндпойнт
+        ll += "\n\tbody\t" + trunc_str(getattr(resp, 'body', b'None').decode())  # тело ответа
+    else:                       # body тоже есть, но его сделал не эндпойнт и не FastAPI, это body-итератор
+        resp_body = [part async for part in resp.body_iterator]         # собираем боди по кусочкам в список
+        ll += "\n\tbody\t" + trunc_str(b''.join(resp_body).decode())    # и логируем тело ответа как строку
+        resp.body_iterator = iterate_in_threadpool(iter(resp_body))     # восстанавливаем body-итератор как было
+
+    # ошибку логируем обязательно, а успех в зависимости от установленного уровня логирования
+    if 200 <= resp.status_code <= 299 or resp.status_code == 302 or resp.status_code == 475:
+        logger.info(ll)
+    else:
+        logger.error(ll)

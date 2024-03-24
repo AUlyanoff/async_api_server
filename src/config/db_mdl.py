@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, PositiveInt, IPvAnyAddress, ConfigDict, F
 from typing import Literal, Union
 from typing_extensions import Annotated
 
-from services.paths import BASE_PATH
+from serv.paths import BASE_PATH
 
 logger = logging.getLogger('boot')
 

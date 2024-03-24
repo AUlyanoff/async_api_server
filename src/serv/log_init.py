@@ -3,8 +3,8 @@ import logging
 import sys
 import platform
 
-from services.req_id import ctx_req_id
-from services.consts import color
+from serv.req_id import ctx_req_id
+from serv.consts import color
 
 # logger = logging.getLogger("log_logger")
 
