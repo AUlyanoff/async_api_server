@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from copy import deepcopy
 import re
 
 from starlette.requests import Request
@@ -12,7 +11,7 @@ logger = logging.getLogger()
 
 
 # Middleware
-async def log_all_req(req: Request, call_next):
+async def log_req_res(req: Request, call_next):
     """Логирование запросов/ответов, КОТОРЫЕ НЕ ОБРАБАТЫВАЕТ FastAPI
        например 404, 405 обрабатывает httpx
        Функция зарегистрирована при загрузке сервера как middleware.

@@ -16,7 +16,7 @@ from app.api.v2.routes import v2
 from app.errorhandlers import pydantic, postgres, tabel_not_found, authentication, interface_err, all_err
 from serv.req_duration import request_duration
 from serv.req_id import generate_req_id
-from serv.log_req_res import log_all_req
+from serv.log_req_res import log_req_res
 from serv.log_init import setup_log
 from asyncpg import __version__ as asyncpg_ver
 from database.core import db_init, db_closed
@@ -58,7 +58,7 @@ app.add_exception_handler(InterfaceError, interface_err)
 app.include_router(v1, prefix="/api/v1", tags=["version_1"])  # регистрация роутов Android
 app.include_router(v2, prefix="/api/v2", tags=["version_2"])  # регистрация роутов Android
 
-app.middleware('http')(log_all_req)  # логирование запросов, не попавших в FastAPI
+app.middleware('http')(log_req_res)  # логирование запросов, не попавших в FastAPI
 app.middleware('http')(request_duration)  # логирование длительности запроса
 app.middleware('http')(generate_req_id)  # генерация асинхронного контекстного id запроса
 # --------------------------------------------- логирование итогов загрузки -------------------------------------------
