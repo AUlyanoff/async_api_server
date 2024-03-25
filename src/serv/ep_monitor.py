@@ -1,34 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import logging
-# import re
-# from contextlib import suppress
-# from copy import deepcopy
 from typing import Callable
 
 from fastapi import Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
 
-from serv.log_utils import log_resp
-# from serv.log_utils import trunc_str
-
 logger = logging.getLogger(__name__)
 
 
 class EPMonitor(APIRoute):
     """
-    Логирует запрос и ответ, ПРОШЕДШИЕ ЧЕРЕЗ FastAPI, включая тело body.
-    Использование: добавлять этот класс в те роуты, запросы по которым хотим логировать.
+    Наблюдат за стартом и завершением ендпойнта (endpoint monitor).
+    Использование: добавлять этот класс в те роуты, за которыми хотим слежить.
     Например, router = APIRouter(route_class=EPMonitor)
     """
     def get_route_handler(self) -> Callable:
         """Переопределение оригинального route_handler с интеграцией логирования"""
         original_route_handler = super().get_route_handler()    # сохраним текущий обработчик маршрута
 
-        async def request_response_logger(req: Request) -> Response:
-            """Логирование запроса и ответа, принимает запрос, возвращает ответ"""
+        async def req2resp(req: Request) -> Response:
+            """Принимает запрос, возвращает ответ"""
 
             # ------------------------------------------- вызов эндпойнта ---------------------------------------------
             try:
@@ -47,5 +40,5 @@ class EPMonitor(APIRoute):
             return resp
             # ---------------------------------------------------------------------------------------------------------
 
-        return request_response_logger
+        return req2resp
 

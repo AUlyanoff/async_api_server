@@ -45,6 +45,7 @@ boot = logging.getLogger('boot')
 # создание нашего приложения - объекта FastAPI
 app = FastAPI(lifespan=lifespan, debug=cfg.debug)
 
+
 # noinspection PydanticTypeChecker
 app.add_exception_handler(Exception, all_err)
 app.add_exception_handler(RequestValidationError, pydantic)
@@ -57,9 +58,9 @@ app.add_exception_handler(InterfaceError, interface_err)
 app.include_router(v1, prefix="/api/v1", tags=["version_1"])  # регистрация роутов Android
 app.include_router(v2, prefix="/api/v2", tags=["version_2"])  # регистрация роутов Android
 
+app.middleware('http')(log_all_req)  # логирование запросов, не попавших в FastAPI
 app.middleware('http')(request_duration)  # логирование длительности запроса
 app.middleware('http')(generate_req_id)  # генерация асинхронного контекстного id запроса
-app.middleware('http')(log_all_req)  # логирование запросов, не попавших в FastAPI
 # --------------------------------------------- логирование итогов загрузки -------------------------------------------
 v1_routes = v1.routes.__len__()
 v2_routes = v2.routes.__len__()

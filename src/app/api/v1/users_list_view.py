@@ -18,7 +18,7 @@ async def users_list(request: Request, filters: List[filterFields], conn: AsyncC
     """Возвращает список зарегистрированных юзеров"""
     api_path = request.url.path  # путь вызова API
     logger.debug(f"\n\t=>\t\t{api_path} ({users_list.__doc__}) started..."
-                 f"\n\tbody\t{trunc_str(', '.join([str(fltr.dict()) for fltr in filters]))}")
+                 f"\n\tbody\t[{trunc_str(', '.join([str(flt.dict()) for flt in filters]))}]")
 
     table_result = await get_users_list(conn)
     dict_result = serialize(table_result)
