@@ -7,9 +7,11 @@ from sys import version as python_ver
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import ProgrammingError, InterfaceError
+from sqlalchemy import __version__ as alchemy_ver
 from asyncpg.exceptions import InternalServerError
 from fastapi import FastAPI, __version__ as fast_api_ver
 from asyncpg.exceptions._base import PostgresError
+from pydantic import __version__ as pyd_ver
 
 from app.api.v1.routes import v1
 from app.api.v2.routes import v2
@@ -67,11 +69,14 @@ v2_routes = v2.routes.__len__()
 
 routes = app.routes.__len__()
 summary = dict(
-    log_level=f"timing {cfg.timing_int}, logging {cfg.log_int} ({logging.getLevelName(cfg.log_int)})",
+    log_level=f"timing {cfg.timing_int}, "
+              f"uvicorn {str(cfg.uvicorn.log).upper()}, "
+              f"logging {cfg.log_int} ({logging.getLevelName(cfg.log_int)})",
     python=str(python_ver),
-    engine=f'FastAPI {fast_api_ver} (debug {app.debug}), asyncpg {asyncpg_ver}',
+    engine=f'FastAPI {fast_api_ver} (debug {app.debug}), asyncpg {asyncpg_ver}, alchemy {alchemy_ver}',
+    pydantic=f'{pyd_ver}',
     config_path=path.join(environ.get('CONF_DIR')),
     routes_quantity=f'{routes} (include system={routes - v1_routes - v2_routes}, v1={v1_routes}, v2={v2_routes})',
-    version=app_ver,
+    server_ver=app_ver,
 )
 boot.info('Main parameters:' + ''.join([f'\n\t{k:<16} \t= {v}' for k, v in summary.items()]))
